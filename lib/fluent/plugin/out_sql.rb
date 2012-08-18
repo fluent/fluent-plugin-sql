@@ -58,17 +58,17 @@ class SQLOutput < ObjectBufferedOutput
   config_param :url, :string
   config_param :begin, :string, :default => nil
   config_param :insert, :string
-  config_param :params, :string, :default => nil
+  config_param :insert_params, :string, :default => nil
   config_param :commit, :string, :default => nil
   config_param :rollback, :string, :default => nil
 
   def configure(conf)
     super
 
-    @params_formats = []
-    if @params
-      @params.split(/\s*,\s*/).each {|s|
-        @params_formats << FormatString.new(s)
+    @insert_params_formats = []
+    if @insert_params
+      @insert_params.split(/\s*,\s*/).each {|s|
+        @insert_params_formats << FormatString.new(s)
       }
     end
 
@@ -81,10 +81,10 @@ class SQLOutput < ObjectBufferedOutput
       begin
         chunk.each {|time,record|
           context = SQLOutputFormatContext.new(:tag=>tag, :time=>Time.at(time), :record=>record)
-          params = @params_formats.map {|f|
+          query = @insert_format.format(context)
+          params = @insert_params_formats.map {|f|
             f.format(context)
           }
-          query = @insert_format.format(context)
 
           db["insert #{query}", *params].insert
         }

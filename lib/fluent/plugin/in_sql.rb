@@ -50,6 +50,7 @@ class SQLInput < Input
 
     #config_param :last_value_store_path, :string  # TODO
     config_param :select, :string     # %{last_value:time}
+    config_param :select_params, :string, :default => nil
     config_param :interval, :time, :default => 60
     #config_param :schedule, :string, :default => nil  # TODO cron format
     config_param :tag, :string
@@ -66,7 +67,15 @@ class SQLInput < Input
 
     def configure(conf)
       super
-      @query_format = FormatString.new(@select)
+
+      @select_params_formats = []
+      if @select_params
+        @select_params.split(/\s*,\s*/).each {|s|
+          @select_params_formats << FormatString.new(s)
+        }
+      end
+
+      @select_format = FormatString.new(@select)
     end
 
     def start
@@ -99,9 +108,12 @@ class SQLInput < Input
 
       @outer.execute {|db|
         context = SQLInputFormatContext.new(:time=>context_time)
-        query = @query_format.format(context)
+        query = @select_format.format(context)
+        params = @select_params_formats.map {|f|
+          f.format(context)
+        }
 
-        db.fetch("SELECT #{query}") {|row|
+        db.fetch("SELECT #{query}", *params) {|row|
           if @time_column
             t = row.delete(@time_column.to_sym)
             if t.is_a?(String)
