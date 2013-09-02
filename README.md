@@ -20,7 +20,7 @@ This sql input plugin reads records from a RDBMS periodically. Thus you can repl
       select_interval 10s
       select_limit 100
 
-      state_file state.yml
+      state_file /var/run/fluentd/sql_state.yml
 
       <table>
         tag table1
@@ -42,7 +42,9 @@ This sql input plugin reads records from a RDBMS periodically. Thus you can repl
 
 ## Architecture
 
-It runs following SQL every 10 seconds:
+This plugin runs following SQL every 10 seconds:
 
     SELECT * FROM rdb_database.table1 WHERE update_col1 > ${last_record[:update_col1]} ORDER BY update_col1 ASC LIMIT 100
+
+It stores the last\_record to state\_file.
 
