@@ -31,7 +31,7 @@ module Fluent
     config_param :state_file, :string, :default => nil
     config_param :tag_prefix, :string, :default => nil
     config_param :select_interval, :time, :default => 10
-    config_param :select_limit, :time, :default => 5000
+    config_param :select_limit, :time, :default => 100
 
     class TableElement
       include Configurable
