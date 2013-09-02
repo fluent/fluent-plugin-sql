@@ -1,7 +1,7 @@
 #
 # Fluent
 #
-# Copyright (C) 2011 FURUHASHI Sadayuki
+# Copyright (C) 2013 FURUHASHI Sadayuki
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
@@ -17,175 +17,200 @@
 #
 module Fluent
 
-require File.expand_path('../format_string', File.dirname(__FILE__))
+  require 'active_record'
 
+  class SQLInput < Input
+    Plugin.register_input('sql', self)
 
-class SQLInput < Input
-  Plugin.register_input('sql', self)
+    config_param :host, :string
+    config_param :port, :integer, :default => nil
+    config_param :adapter, :string
+    config_param :database, :string
+    config_param :username, :string, :default => nil
+    config_param :password, :string, :default => nil
+    config_param :state_file, :string, :default => nil
+    config_param :tag_prefix, :string, :default => nil
+    config_param :select_interval, :time, :default => 10
+    config_param :select_limit, :time, :default => 5000
 
-  class SQLInputFormatContext < FormatContext
-    include TimeFormatContextMixin
-    include HostnameContextMixin
+    class TableElement
+      include Configurable
 
-    def initialize(params)
-      @last_values = params[:last_values] || {}
-      super
-    end
+      config_param :tag, :string
+      config_param :table, :string
+      config_param :update_column, :string, :default => nil
+      config_param :time_column, :string, :default => nil
 
-    def last_value(column)
-      @last_values[column.to_sym]
-    end
-  end
+      def initialize
+        super()
+      end
 
-  def initialize
-    require 'sequel'
-    require 'strscan'
-    super
-  end
+      def configure(conf)
+        super
+      end
 
-  config_param :url, :string
+      def init(tag_prefix, base_model)
+        @tag = "#{tag_prefix}.#{@tag}" if tag_prefix
 
-  class QueryEntry
-    include Fluent::Configurable
+        table_name = @table
+        @model = Class.new(base_model) do
+          self.table_name = table_name
+          self.inheritance_column = '_never_use_'
+        end
+        class_name = table_name.singularize.camelize
+        base_model.const_set(class_name, @model)
+        model_name = ActiveModel::Name.new(@model, nil, class_name)
+        @model.define_singleton_method(:model_name) { model_name }
 
-    #config_param :last_value_store_path, :string  # TODO
-    config_param :select, :string     # %{last_value:time}
-    config_param :select_params, :string, :default => nil
-    config_param :interval, :time, :default => 60
-    #config_param :schedule, :string, :default => nil  # TODO cron format
-    config_param :tag, :string
-    config_param :tag_column, :string, :default => nil
-    config_param :time_column, :string, :default => nil
+        unless @update_column
+          columns = Hash[@model.columns.map {|c| [c.name, c] }]
+          pk = columns[@model.primary_key]
+          unless pk
+            raise "Composite primary key is not supported. Set update_column parameter to <table> section."
+          end
+          @update_column = pk.name
+        end
+      end
 
-    def initialize(outer)
-      @outer = outer
-      @finished = false
-      @thread = nil
-      @next_time = Time.now
-      super()
+      def emit_next_records(last_record, limit)
+        relation = @model
+        if last_record && last_update_value = last_record[@update_column]
+          relation = relation.where("#{@update_column} > ?", last_update_value)
+        end
+        relation = relation.order("#{@update_column} ASC").limit(limit)
+
+        now = Engine.now
+        entry_name = @model.table_name.singularize
+
+        me = MultiEventStream.new
+        relation.each do |obj|
+          record = obj.as_json[entry_name] rescue nil
+          if record
+            if tv = record[@time_column]
+              time = Time.parse(tv.to_s) rescue now
+            else
+              time = now
+            end
+            me.add(time, record)
+            last_record = record
+          end
+        end
+
+        Engine.emit_stream(@tag, me)
+
+        return last_record
+      end
     end
 
     def configure(conf)
       super
 
-      @select_params_formats = []
-      if @select_params
-        @select_params.split(/\s*,\s*/).each {|s|
-          @select_params_formats << FormatString.new(s)
-        }
-      end
+      @tables = conf.elements.select {|e|
+        e.name == 'table'
+      }.map {|e|
+        te = TableElement.new
+        te.configure(e)
+        te
+      }
 
-      @select_format = FormatString.new(@select)
+      if config['all_tables']
+        @all_tables = true
+      end
     end
 
+    class BaseModel < ActiveRecord::Base
+      self.abstract_class = true
+    end
+
+    SKIP_TABLE_REGEXP = /\Aschema_migrations\Z/i
+
     def start
-      @thread = Thread.new(&method(:run))
+      @state_store = StateStore.new(@state_file)
+
+      config = {
+        :adapter => @adapter,
+        :host => @host,
+        :port => @port,
+        :database => @database,
+        :username => @username,
+        :password => @password,
+      }
+
+      @base_model = BaseModel#Class.new(BaseModel)
+      @base_model.establish_connection(config)
+
+      if @all_tables
+        @tables = @base_model.connection.tables.map do |table_name|
+          if table_name.match(SKIP_TABLE_REGEXP)
+            nil
+          else
+            te = TableElement.new
+            te.configure({
+              'table' => table_name,
+              'tag' => table_name,
+              'update_column' => nil,
+            })
+            te
+          end
+        end.compact
+      end
+
+      @tables.reject! do |te|
+        begin
+          te.init(@tag_prefix, @base_model)
+          $log.info "Selecting '#{te.table}' table"
+          false
+        rescue
+          $log.warn "Can't handle '#{te.table}' table. Ignoring.", :error => $!
+          $log.warn_backtrace $!.backtrace
+          true
+        end
+      end
+
+      @thread = Thread.new(&method(:thread_main))
     end
 
     def shutdown
-      @finished = true
-      @thread.join if @thread
+      @stop_flag = true
     end
 
-    private
-    def run
-      until @finished
-        now = Time.now
-        if @next_time <= now
-          run_query(@next_time)
-          @next_time = calc_next_time(@next_time)
+    def thread_main
+      until @stop_flag
+        sleep @select_interval
+
+        @tables.each do |t|
+          begin
+            last_record = @state_store.last_records[t.table]
+            @state_store.last_records[t.table] = t.emit_next_records(last_record, @select_limit)
+            @state_store.update!
+          rescue
+            $log.error "unexpected error", :error=>$!.to_s
+            $log.error_backtrace
+          end
         end
-        sleep [1, @next_time - now].max
       end
     end
 
-    def calc_next_time(before_time)
-      before_time + @interval
-    end
+    class StateStore
+      def initialize(path)
+        @path = path
+        if File.exists?(@path)
+          @data = YAML.load_file(@path)
+        else
+          @data = {}
+        end
+      end
 
-    def run_query(context_time)
-      ess = {}
+      def last_records
+        @data['last_records'] ||= {}
+      end
 
-      @outer.execute {|db|
-        context = SQLInputFormatContext.new(:time=>context_time)
-        query = @select_format.format(context)
-        params = @select_params_formats.map {|f|
-          f.format(context)
+      def update!
+        File.open(@path, 'w') {|f|
+          f.write YAML.dump(@data)
         }
-
-        db.fetch("SELECT #{query}", *params) {|row|
-          if @time_column
-            t = row.delete(@time_column.to_sym)
-            if t.is_a?(String)
-              time = Time.parse(t).to_i
-            else
-              time = t.to_i
-            end
-          end
-          time ||= context_time.to_i
-
-          tag = @tag
-          if @tag_column
-            if t = row.delete(@tag_column.to_sym)
-              tag = "#{tag}.#{t}"
-            end
-          end
-
-          record = {}
-          row.each_pair {|k,v|
-            record[k.to_s] = v
-          }
-
-          es = (ess[tag] ||= MultiEventStream.new)
-          es.add(time, record)
-        }
-      }
-
-      ess.each_pair {|tag,es|
-        Engine.emit_stream(tag, es)
-      }
+      end
     end
   end
-
-  def configure(conf)
-    super
-
-    @query_entries = []
-
-    conf.elements.select {|e|
-      e.name == 'query'
-    }.each {|e|
-      qe = QueryEntry.new(self)
-      qe.configure(e)
-      @query_entries << qe
-    }
-  end
-
-  def start
-    @query_entries.each {|qe|
-      qe.start
-    }
-  end
-
-  def shutdown
-    @query_entries.each {|qe|
-      qe.shutdown
-    }
-  end
-
-  def execute(&block)
-    db = Sequel.connect(@url, :max_connections=>1)
-    begin
-      block.call(db)
-    rescue
-      $log.warn "in_sql: #{$!}"
-      $log.warn_backtrace
-    ensure
-      db.disconnect
-    end
-  end
-end
-
 
 end
-
