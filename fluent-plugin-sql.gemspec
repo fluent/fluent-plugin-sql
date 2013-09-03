@@ -18,7 +18,7 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency "fluentd", "~> 0.10.0"
   gem.add_dependency 'activerecord', ['3.2.12']
-  gem.add_dependency "yajl-ruby", "~> 1.0"
-  gem.add_dependency "rake", ">= 0.9.2"
   gem.add_dependency 'mysql2', ['~> 0.3.12']
+  gem.add_dependency 'pg', ['~> 0.16.0']
+  gem.add_development_dependency "rake", ">= 0.9.2"
 end

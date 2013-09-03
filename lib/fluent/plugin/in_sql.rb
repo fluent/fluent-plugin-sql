@@ -42,10 +42,6 @@ module Fluent
       config_param :update_column, :string, :default => nil
       config_param :time_column, :string, :default => nil
 
-      def initialize
-        super()
-      end
-
       def configure(conf)
         super
 
@@ -172,6 +168,7 @@ module Fluent
         end
       end
 
+      @stop_flag = false
       @thread = Thread.new(&method(:thread_main))
     end
 
