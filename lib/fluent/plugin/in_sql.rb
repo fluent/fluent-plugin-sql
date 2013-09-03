@@ -28,16 +28,17 @@ module Fluent
     config_param :database, :string
     config_param :username, :string, :default => nil
     config_param :password, :string, :default => nil
+
     config_param :state_file, :string, :default => nil
     config_param :tag_prefix, :string, :default => nil
-    config_param :select_interval, :time, :default => 10
-    config_param :select_limit, :time, :default => 100
+    config_param :select_interval, :time, :default => 60
+    config_param :select_limit, :time, :default => 500
 
     class TableElement
       include Configurable
 
-      config_param :tag, :string
       config_param :table, :string
+      config_param :tag, :string, :default => nil
       config_param :update_column, :string, :default => nil
       config_param :time_column, :string, :default => nil
 
@@ -47,6 +48,11 @@ module Fluent
 
       def configure(conf)
         super
+
+        unless @state_file
+          $log.warn "'state_file PATH' parameter is not set to a 'sql' source."
+          $log.warn "this parameter is highly recommended to save the last rows to resume tailing."
+        end
       end
 
       def init(tag_prefix, base_model)
@@ -118,10 +124,6 @@ module Fluent
       end
     end
 
-    class BaseModel < ActiveRecord::Base
-      self.abstract_class = true
-    end
-
     SKIP_TABLE_REGEXP = /\Aschema_migrations\Z/i
 
     def start
@@ -136,7 +138,10 @@ module Fluent
         :password => @password,
       }
 
-      @base_model = BaseModel#Class.new(BaseModel)
+      @base_model = Class.new(ActiveRecord::Base) do
+        self.abstract_class = true
+      end
+      SQLInput.const_set("BaseModel_#{rand(1<<31)}", @base_model)
       @base_model.establish_connection(config)
 
       if @all_tables
