@@ -2,7 +2,7 @@
 
 ## Overview
 
-This sql input plugin reads records from a RDBMS periodically. Thus you can replicate tables to other storages through Fluentd.
+This sql input plugin reads records from a RDBMS periodically. Thus you can copy tables to other storages through Fluentd.
 
 ## How does it work?
 
@@ -10,8 +10,7 @@ This plugin runs following SQL repeatedly every 60 seconds to *tail* a table lik
 
 SELECT * FROM *table* WHERE *update\_column* > *last\_update\_column\_value* ORDER BY *update_column* ASC LIMIT 500
 
-What you need to configure is *update\_column*. The column needs to be updated every time when you update the row so that this plugin detects newly updated rows. Generally, the column is a timestamp such as `updated_at`.
-If you omit to set the column, it uses primary key. And this plugin can't detect updated but it only reads newly inserted rows.
+What you need to configure is *update\_column*. The column should be incremental column (such as AUTO\_ INCREMENT primary key) so that this plugin reads newly INSERTed rows. Alternatively, it should be updated every time when you update the row (such as `updated_at` column) so that this plugin reads the UPDATEd rows as well. If you omit to set *update\_column* parameter, it uses primary key.
 
 It stores last selected rows to a file named state\_file to not forget the last row when fluentd restarted.
 
@@ -69,4 +68,10 @@ It stores last selected rows to a file named state\_file to not forget the last 
 * **table** RDBM table name
 * **update_column**
 * **time_column** (optional)
+
+## Limitation
+
+You should make sure target tables have index (and/or partitions) on the *update\_column*. Otherwise SELECT causes full table scan and serious performance problem.
+
+You can't replicate DELETEd rows.
 
