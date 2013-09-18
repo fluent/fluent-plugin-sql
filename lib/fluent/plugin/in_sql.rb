@@ -54,16 +54,22 @@ module Fluent
       def init(tag_prefix, base_model)
         @tag = "#{tag_prefix}.#{@tag}" if tag_prefix
 
+        # creates a model for this table
         table_name = @table
         @model = Class.new(base_model) do
           self.table_name = table_name
           self.inheritance_column = '_never_use_'
         end
+
+        # ActiveRecord requires model class to have a name.
         class_name = table_name.singularize.camelize
         base_model.const_set(class_name, @model)
+
+        # Sets model_name otherwise ActiveRecord causes errors
         model_name = ActiveModel::Name.new(@model, nil, class_name)
         @model.define_singleton_method(:model_name) { model_name }
 
+        # if update_column is not set, here uses primary key
         unless @update_column
           columns = Hash[@model.columns.map {|c| [c.name, c] }]
           pk = columns[@model.primary_key]
@@ -74,6 +80,7 @@ module Fluent
         end
       end
 
+      # emits next records and returns the last record of emitted records
       def emit_next_records(last_record, limit)
         relation = @model
         if last_record && last_update_value = last_record[@update_column]
@@ -134,15 +141,26 @@ module Fluent
         :password => @password,
       }
 
+      # creates subclass of ActiveRecord::Base so that it can have different
+      # database configuration from ActiveRecord::Base.
       @base_model = Class.new(ActiveRecord::Base) do
+        # base model doesn't have corresponding phisical table
         self.abstract_class = true
       end
+
+      # ActiveRecord requires the base_model to have a name. Here sets name
+      # of an anonymous class by assigning it to a constant. In Ruby, class has
+      # a name of a constant assigned first
       SQLInput.const_set("BaseModel_#{rand(1<<31)}", @base_model)
+
+      # Now base_model can have independent configuration from ActiveRecord::Base
       @base_model.establish_connection(config)
 
       if @all_tables
+        # get list of tables from the database
         @tables = @base_model.connection.tables.map do |table_name|
           if table_name.match(SKIP_TABLE_REGEXP)
+            # some tables such as "schema_migrations" should be ignored
             nil
           else
             te = TableElement.new
@@ -156,6 +174,7 @@ module Fluent
         end.compact
       end
 
+      # ignore tables if TableElement#init failed
       @tables.reject! do |te|
         begin
           te.init(@tag_prefix, @base_model)
