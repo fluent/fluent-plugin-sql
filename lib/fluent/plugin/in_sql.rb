@@ -217,6 +217,12 @@ module Fluent
         @path = path
         if File.exists?(@path)
           @data = YAML.load_file(@path)
+          if @data == false || @data == []
+            # this happens if an users created an empty file accidentally
+            @data = {}
+          elsif !@data.is_a?(Hash)
+            raise "state_file on #{@path.inspect} is invalid"
+          end
         else
           @data = {}
         end
