@@ -96,7 +96,7 @@ module Fluent
           record = obj.as_json[entry_name] rescue nil
           if record
             if tv = record[@time_column]
-              time = Time.parse(tv.to_s) rescue now
+              time = Time.parse(tv.to_s).to_i rescue now
             else
               time = now
             end
