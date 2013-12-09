@@ -59,6 +59,16 @@ module Fluent
         @model = Class.new(base_model) do
           self.table_name = table_name
           self.inheritance_column = '_never_use_'
+          #self.include_root_in_json = false
+
+          def read_attribute_for_serialization(n)
+            v = send(n)
+            if v.respond_to?(:to_msgpack)
+              v
+            else
+              v.to_s
+            end
+          end
         end
 
         # ActiveRecord requires model class to have a name.
@@ -93,10 +103,14 @@ module Fluent
 
         me = MultiEventStream.new
         relation.each do |obj|
-          record = obj.as_json[entry_name] rescue nil
+          record = obj.serializable_hash rescue nil
           if record
-            if tv = record[@time_column]
-              time = Time.parse(tv.to_s).to_i rescue now
+            if @time_column && tv = obj.read_attribute(@time_column)
+              if tv.is_a?(Time)
+                time = tv.to_i
+              else
+                time = Time.parse(tv.to_s).to_i rescue now
+              end
             else
               time = now
             end
