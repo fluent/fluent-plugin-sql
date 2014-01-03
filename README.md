@@ -23,7 +23,7 @@ It stores last selected rows to a file (named *state\_file*) to not forget the l
       host rdb_host
       database rdb_database
       adapter mysql2_or_postgresql_etc
-      user myusername
+      username myusername
       password mypassword
 
       tag_prefix my.rdb  # optional, but recommended
