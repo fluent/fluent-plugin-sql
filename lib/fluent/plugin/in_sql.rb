@@ -34,6 +34,10 @@ module Fluent
     config_param :select_interval, :time, :default => 60
     config_param :select_limit, :time, :default => 500
 
+    unless method_defined?(:log)
+      define_method(:log) { $log }
+    end
+
     class TableElement
       include Configurable
 
@@ -166,7 +170,7 @@ module Fluent
       # ActiveRecord requires the base_model to have a name. Here sets name
       # of an anonymous class by assigning it to a constant. In Ruby, class has
       # a name of a constant assigned first
-      SQLInput.const_set("BaseModel_#{rand(1<<31)}", @base_model)
+      SQLInput.const_set("BaseModel_#{rand(1 << 31)}", @base_model)
 
       # Now base_model can have independent configuration from ActiveRecord::Base
       @base_model.establish_connection(config)
@@ -193,11 +197,11 @@ module Fluent
       @tables.reject! do |te|
         begin
           te.init(@tag_prefix, @base_model)
-          $log.info "Selecting '#{te.table}' table"
+          log.info "Selecting '#{te.table}' table"
           false
         rescue
-          $log.warn "Can't handle '#{te.table}' table. Ignoring.", :error => $!
-          $log.warn_backtrace $!.backtrace
+          log.warn "Can't handle '#{te.table}' table. Ignoring.", :error => $!
+          log.warn_backtrace $!.backtrace
           true
         end
       end
@@ -220,8 +224,8 @@ module Fluent
             @state_store.last_records[t.table] = t.emit_next_records(last_record, @select_limit)
             @state_store.update!
           rescue
-            $log.error "unexpected error", :error=>$!.to_s
-            $log.error_backtrace
+            log.error "unexpected error", :error=>$!.to_s
+            log.error_backtrace
           end
         end
       end
