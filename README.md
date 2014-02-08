@@ -1,4 +1,4 @@
-# SQL input plugin for Fluentd event collector
+# SQL input plugin for [Fluentd](http://fluentd.org) event collector
 
 ## Overview
 
