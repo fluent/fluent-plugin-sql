@@ -24,8 +24,7 @@ module Fluent
       include Configurable
 
       config_param :table, :string
-      config_param :key_names, :string, :default => nil
-      config_param :column_names, :string
+      config_param :column_mapping, :string
 
       attr_reader :model
       attr_reader :pattern
@@ -39,29 +38,14 @@ module Fluent
       def configure(conf)
         super
 
-        @column_names = @column_names.split(',')
-        if @key_names.nil?
-          @format_proc = Proc.new { |record|
-            new_record = {}
-            @column_names.each { |c|
-              new_record[c] = record[c]
-            }
-            new_record
+        @mapping = parse_column_mapping(@column_mapping)
+        @format_proc = Proc.new { |record|
+          new_record = {}
+          @mapping.each { |k, c|
+            new_record[c] = record[k]
           }
-        else
-          @key_names = @key_names.split(',')
-          if @key_names.size != @column_names.size
-            @log.warn "key_name and column_names are different size"
-          end
-
-          @format_proc = Proc.new { |record|
-            new_record = {}
-            @key_names.map.with_index { |k, i|
-              new_record[@column_names[i]] = record[k]
-            }
-            new_record
-          }
-        end
+          new_record
+        }
       end
 
       def init(base_model)
@@ -93,6 +77,18 @@ module Fluent
           end
         }
         @model.import(records)
+      end
+
+      private
+
+      def parse_column_mapping(column_mapping_conf)
+        mapping = {}
+        column_mapping_conf.split(',').each { |column_map|
+          key, column = column_map.strip.split(':', 2)
+          column = key if column.nil?
+          mapping[key] = column
+        }
+        mapping
       end
     end
 
