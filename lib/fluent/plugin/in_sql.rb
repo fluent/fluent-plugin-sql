@@ -48,11 +48,6 @@ module Fluent
 
       def configure(conf)
         super
-
-        unless @state_file
-          $log.warn "'state_file PATH' parameter is not set to a 'sql' source."
-          $log.warn "this parameter is highly recommended to save the last rows to resume tailing."
-        end
       end
 
       def init(tag_prefix, base_model)
@@ -132,6 +127,11 @@ module Fluent
 
     def configure(conf)
       super
+
+      unless @state_file
+        $log.warn "'state_file PATH' parameter is not set to a 'sql' source."
+        $log.warn "this parameter is highly recommended to save the last rows to resume tailing."
+      end
 
       @tables = conf.elements.select {|e|
         e.name == 'table'
@@ -252,7 +252,7 @@ module Fluent
       end
 
       def update!
-        File.open(@path, 'w') {|f|
+        File.open(@path, 'w+') {|f|
           f.write YAML.dump(@data)
         }
       end
