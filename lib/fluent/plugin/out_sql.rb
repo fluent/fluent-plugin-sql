@@ -25,6 +25,7 @@ module Fluent
 
       config_param :table, :string
       config_param :column_mapping, :string
+      config_param :num_retries, :integer, :default => 5
 
       attr_reader :model
       attr_reader :pattern
@@ -76,7 +77,34 @@ module Fluent
             @log.warn "Failed to create the model. Ignore a record:", args
           end
         }
-        @model.import(records)
+        begin
+          @model.import(records)
+        rescue ActiveRecord::StatementInvalid, ActiveRecord::ThrowResult, ActiveRecord::Import::MissingColumnError => e
+          # ignore other exceptions to use Fluentd retry mechanizm
+          @log.warn "Got deterministic error. Fallback to one-by-one import", :error => e.message, :error_class => e.class
+          one_by_one_import(records)
+        end
+      end
+
+      def one_by_one_import(records)
+        records.each { |record|
+          retries = 0
+          begin
+            @model.import([record])
+          rescue ActiveRecord::StatementInvalid, ActiveRecord::ThrowResult, ActiveRecord::Import::MissingColumnError => e
+            @log.error "Got deterministic error again. Dump a record", :error => e.message, :error_class => e.class, :record => record
+          rescue => e
+            retries += 1
+            if retries > @num_retries
+              @log.error "Can't recover undeterministic error. Dump a record", :error => e.message, :error_class => e.class, :record => record
+              next
+            end
+
+            @log.warn "Failed to import a record: retry number = #{retries}", :error  => e.message, :error_class => e.class
+            sleep 0.5
+            retry
+          end
+        }
       end
 
       private
