@@ -95,6 +95,7 @@ module Fluent
         if last_record && last_update_value = last_record[@update_column]
           relation = relation.where("#{@update_column} > ?", last_update_value)
         end
+        relation = relation.order("#{@update_column} ASC").limit(limit)
         if limit > 0
           relation = relation.limit(limit)
         end
