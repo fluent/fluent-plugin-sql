@@ -28,6 +28,7 @@ module Fluent
     config_param :database, :string
     config_param :username, :string, :default => nil
     config_param :password, :string, :default => nil
+    config_param :socket, :string, :default => nil
 
     config_param :state_file, :string, :default => nil
     config_param :tag_prefix, :string, :default => nil
@@ -158,6 +159,7 @@ module Fluent
         :database => @database,
         :username => @username,
         :password => @password,
+        :socket => @socket,
       }
 
       # creates subclass of ActiveRecord::Base so that it can have different
