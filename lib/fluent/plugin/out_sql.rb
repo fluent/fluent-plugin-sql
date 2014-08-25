@@ -215,7 +215,7 @@ module Fluent
         log.info "Selecting '#{te.table}' table"
         false
       rescue => e
-        log.warn "Can't handle '#{te.table}' table. Ignoring.", :error => e
+        log.warn "Can't handle '#{te.table}' table. Ignoring.", :error => e.message, :error_class => e.class
         log.warn_backtrace e.backtrace
         true
       end

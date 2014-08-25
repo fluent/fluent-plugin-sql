@@ -201,9 +201,9 @@ module Fluent
           te.init(@tag_prefix, @base_model)
           log.info "Selecting '#{te.table}' table"
           false
-        rescue
-          log.warn "Can't handle '#{te.table}' table. Ignoring.", :error => $!
-          log.warn_backtrace $!.backtrace
+        rescue => e
+          log.warn "Can't handle '#{te.table}' table. Ignoring.", :error => e.message, :error_class => e.class
+          log.warn_backtrace e.backtrace
           true
         end
       end
@@ -225,9 +225,9 @@ module Fluent
             last_record = @state_store.last_records[t.table]
             @state_store.last_records[t.table] = t.emit_next_records(last_record, @select_limit)
             @state_store.update!
-          rescue
-            log.error "unexpected error", :error=>$!.to_s
-            log.error_backtrace
+          rescue => e
+            log.error "unexpected error", :error => e.message, :error_class => e.class
+            log.error_backtrace e.backtrace
           end
         end
       end
