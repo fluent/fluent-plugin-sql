@@ -58,7 +58,7 @@ It stores last selected rows to a file (named *state\_file*) to not forget the l
 * **port** RDBMS port
 * **database** RDBMS database name
 * **adapter** RDBMS driver name (mysql2 for MySQL, postgresql for PostgreSQL, etc.)
-* **user** RDBMS login user name
+* **username** RDBMS login user name
 * **password** RDBMS login password
 * **tag_prefix** prefix of tags of events. actual tag will be this\_tag\_prefix.tables\_tag (optional)
 * **select_interval** interval to run SQLs (optional)

@@ -97,6 +97,9 @@ module Fluent
           relation = relation.where("#{@update_column} > ?", last_update_value)
         end
         relation = relation.order("#{@update_column} ASC").limit(limit)
+        if limit > 0
+          relation = relation.limit(limit)
+        end
 
         now = Engine.now
         entry_name = @model.table_name.singularize
@@ -254,7 +257,7 @@ module Fluent
       end
 
       def update!
-        File.open(@path, 'w') {|f|
+        File.open(@path, 'w+') {|f|
           f.write YAML.dump(@data)
         }
       end
