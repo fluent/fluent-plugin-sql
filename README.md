@@ -144,4 +144,5 @@ This plugin takes advantage of ActiveRecord underneath. For `host`, `port`, `dat
 \<table\> sections:
 
 * **table** RDBM table name
+* **column_mapping**: Record to table schema mapping. The format is consists of `from:to` or `key` values are separated by `,`. For example, if set 'item_id:id,item_text:data,updated_at' to **column_mapping**, `item_id` field of record is stored into `id` column and `updated_at` field of record is stored into `updated_at` column.
 * **pattern**: the pattern to which the incoming event's tag (after it goes through `remove_tag_prefix`, if given). The patterns should follow the same syntax as [that of <match>](http://docs.fluentd.org/articles/config-file#match-pattern-how-you-control-the-event-flow-inside-fluentd). **Exactly one <table> element must NOT have this parameter so that it becomes the default table to store data**.
