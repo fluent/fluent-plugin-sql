@@ -80,6 +80,7 @@ module Fluent
         @model.define_singleton_method(:model_name) { model_name }
 
         # if update_column is not set, here uses primary key
+        #@model.primary_key = :id
         unless @update_column
           columns = Hash[@model.columns.map {|c| [c.name, c] }]
           pk = columns[@model.primary_key]
@@ -150,7 +151,7 @@ module Fluent
     SKIP_TABLE_REGEXP = /\Aschema_migrations\Z/i
 
     def start
-      @state_store = StateStore.new(@state_file)
+      @state_store = @state_file.nil? ? NullStateStore.new : StateStore.new(@state_file)
 
       config = {
         :adapter => @adapter,
@@ -257,6 +258,19 @@ module Fluent
         File.open(@path, 'w') {|f|
           f.write YAML.dump(@data)
         }
+      end
+    end
+
+    class NullStateStore
+      def initialize
+        @dummy = {}
+      end
+
+      def last_records
+        @dummy
+      end
+
+      def update!
       end
     end
   end
