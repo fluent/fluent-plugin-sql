@@ -7,6 +7,15 @@ This SQL plugin has two parts:
 1. SQL **input** plugin reads records from RDBMSes periodically. An example use case would be getting "diffs" of a table (based on the "updated_at" field).
 2. SQL **output** plugin that writes records into RDBMes. An example use case would be aggregating server/app/sensor logs into RDBMS systems.
 
+## Installation
+
+    $ fluent-gem install fluent-plugin-sql --no-document
+    $ fluent-gem install pg --no-document # for postgresql
+
+You should install actual RDBMS driver gem together. `pg` gem for postgresql adapter or `mysql2` gem for `mysql2` adapter. Other adapters supported by [ActiveRecord](https://github.com/rails/rails/tree/master/activerecord) should work.
+
+We recommend that mysql2 gem is higher than `0.3.12` and pg gem is higher than `0.16.0`.
+
 ## Input: How It Works
 
 This plugin runs following SQL periodically:
@@ -25,7 +34,7 @@ It stores last selected rows to a file (named *state\_file*) to not forget the l
 
       host rdb_host
       database rdb_database
-      adapter mysql2_or_postgresql_etc
+      adapter mysql2_or_postgresql_or_etc
       username myusername
       password mypassword
 
@@ -57,7 +66,7 @@ It stores last selected rows to a file (named *state\_file*) to not forget the l
 * **host** RDBMS host
 * **port** RDBMS port
 * **database** RDBMS database name
-* **adapter** RDBMS driver name (mysql2 for MySQL, postgresql for PostgreSQL, etc.)
+* **adapter** RDBMS driver name. You should install corresponding gem before start (mysql2 gem for mysql2 adapter, pg gem for postgresql adapter, etc.)
 * **user** RDBMS login user name
 * **password** RDBMS login password
 * **tag_prefix** prefix of tags of events. actual tag will be this\_tag\_prefix.tables\_tag (optional)
@@ -90,7 +99,7 @@ This plugin takes advantage of ActiveRecord underneath. For `host`, `port`, `dat
       host rdb_host
       port 3306
       database rdb_database
-      adapter mysql2_or_postgresql_etc
+      adapter mysql2_or_postgresql_or_etc
       username myusername
       password mypassword
       socket path_to_socket
@@ -126,7 +135,7 @@ This plugin takes advantage of ActiveRecord underneath. For `host`, `port`, `dat
 * **host** RDBMS host
 * **port** RDBMS port
 * **database** RDBMS database name
-* **adapter** RDBMS driver name (mysql2 for MySQL, postgresql for PostgreSQL, etc.)
+* **adapter** RDBMS driver name. You should install corresponding gem before start (mysql2 gem for mysql2 adapter, pg gem for postgresql adapter, etc.)
 * **user** RDBMS login user name
 * **password** RDBMS login password
 * **socket** RDBMS socket path
