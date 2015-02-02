@@ -30,7 +30,7 @@ module Fluent
     config_param :password, :string, :default => nil
     config_param :socket, :string, :default => nil
 
-    config_param :state_file, :string, :default => nil
+    config_param :state_file, :string, :default => ''
     config_param :tag_prefix, :string, :default => nil
     config_param :select_interval, :time, :default => 60
     config_param :select_limit, :time, :default => 500
