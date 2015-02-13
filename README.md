@@ -67,7 +67,7 @@ It stores last selected rows to a file (named *state\_file*) to not forget the l
 * **port** RDBMS port
 * **database** RDBMS database name
 * **adapter** RDBMS driver name. You should install corresponding gem before start (mysql2 gem for mysql2 adapter, pg gem for postgresql adapter, etc.)
-* **user** RDBMS login user name
+* **username** RDBMS login user name
 * **password** RDBMS login password
 * **tag_prefix** prefix of tags of events. actual tag will be this\_tag\_prefix.tables\_tag (optional)
 * **select_interval** interval to run SQLs (optional)
@@ -107,6 +107,7 @@ This plugin takes advantage of ActiveRecord underneath. For `host`, `port`, `dat
 
       <table>
         table table1
+        column_mapping 'timestamp:created_at,fluentdata1:dbcol1,fluentdata2:dbcol2,fluentdata3:dbcol3'
         # This is the default table because it has no "pattern" field
         # The logic is such that if all non-default <table> blocks
         # do not match, the default one is chosen.
@@ -136,7 +137,7 @@ This plugin takes advantage of ActiveRecord underneath. For `host`, `port`, `dat
 * **port** RDBMS port
 * **database** RDBMS database name
 * **adapter** RDBMS driver name. You should install corresponding gem before start (mysql2 gem for mysql2 adapter, pg gem for postgresql adapter, etc.)
-* **user** RDBMS login user name
+* **username** RDBMS login user name
 * **password** RDBMS login password
 * **socket** RDBMS socket path
 * **remove_tag_prefix** remove the given prefix from the events. See "tag_prefix" in "Input: Configuration". (optional)
@@ -144,5 +145,5 @@ This plugin takes advantage of ActiveRecord underneath. For `host`, `port`, `dat
 \<table\> sections:
 
 * **table** RDBM table name
-* **column_mapping**: Record to table schema mapping. The format is consists of `from:to` or `key` values are separated by `,`. For example, if set 'item_id:id,item_text:data,updated_at' to **column_mapping**, `item_id` field of record is stored into `id` column and `updated_at` field of record is stored into `updated_at` column.
+* **column_mapping**: [Required] Record to table schema mapping. The format is consists of `from:to` or `key` values are separated by `,`. For example, if set 'item_id:id,item_text:data,updated_at' to **column_mapping**, `item_id` field of record is stored into `id` column and `updated_at` field of record is stored into `updated_at` column.
 * **pattern**: the pattern to which the incoming event's tag (after it goes through `remove_tag_prefix`, if given). The patterns should follow the same syntax as [that of <match>](http://docs.fluentd.org/articles/config-file#match-pattern-how-you-control-the-event-flow-inside-fluentd). **Exactly one <table> element must NOT have this parameter so that it becomes the default table to store data**.
