@@ -46,6 +46,7 @@ module Fluent
       config_param :tag, :string, :default => nil
       config_param :update_column, :string, :default => nil
       config_param :time_column, :string, :default => nil
+      config_param :primary_key, :string, :default => nil
 
       def configure(conf)
         super
@@ -56,9 +57,12 @@ module Fluent
 
         # creates a model for this table
         table_name = @table
+        primary_key = @primary_key
         @model = Class.new(base_model) do
           self.table_name = table_name
           self.inheritance_column = '_never_use_'
+          self.primary_key = primary_key if primary_key
+
           #self.include_root_in_json = false
 
           def read_attribute_for_serialization(n)

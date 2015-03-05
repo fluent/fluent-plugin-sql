@@ -81,6 +81,7 @@ It stores last selected rows to a file (named *state\_file*) to not forget the l
 * **table** RDBM table name
 * **update_column**: see above description
 * **time_column** (optional): if this option is set, this plugin uses this column's value as the the event's time. Otherwise it uses current time.
+* **primary_key** (optional): if you want to get data from the table which doesn't have primary key like PostgreSQL's View, set this parameter.
 
 ## Input: Limitation
 
