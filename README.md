@@ -109,24 +109,22 @@ This plugin takes advantage of ActiveRecord underneath. For `host`, `port`, `dat
       <table>
         table table1
         column_mapping 'timestamp:created_at,fluentdata1:dbcol1,fluentdata2:dbcol2,fluentdata3:dbcol3'
-        # This is the default table because it has no "pattern" field
+        # This is the default table because it has no "pattern" argument in <table>
         # The logic is such that if all non-default <table> blocks
         # do not match, the default one is chosen.
         # The default table is required.
       </table>
 
-      <table>
+      <table hello.*> # You can pass the same pattern you use in match statements.
         table table2
-        pattern hello.* # You can pass the same pattern you use in match statements.
         # This is the non-default table. It is chosen if the tag matches the pattern
         # AFTER remove_tag_prefix is applied to the incoming event. For example, if
         # the message comes in with the tag my.rdb.hello.world, "remove_tag_prefix my.rdb"
         # makes it "hello.world", which gets matched here because of "pattern hello.*".
       </table>
       
-      <table>
+      <table hello.world>
         table table3
-        pattern hello.world
         # This is the second non-default table. You can have as many non-default tables
         # as you wish. One caveat: non-default tables are matched top-to-bottom and
         # the events go into the first table it matches to. Hence, this particular table
@@ -147,4 +145,4 @@ This plugin takes advantage of ActiveRecord underneath. For `host`, `port`, `dat
 
 * **table** RDBM table name
 * **column_mapping**: [Required] Record to table schema mapping. The format is consists of `from:to` or `key` values are separated by `,`. For example, if set 'item_id:id,item_text:data,updated_at' to **column_mapping**, `item_id` field of record is stored into `id` column and `updated_at` field of record is stored into `updated_at` column.
-* **pattern**: the pattern to which the incoming event's tag (after it goes through `remove_tag_prefix`, if given). The patterns should follow the same syntax as [that of <match>](http://docs.fluentd.org/articles/config-file#match-pattern-how-you-control-the-event-flow-inside-fluentd). **Exactly one <table> element must NOT have this parameter so that it becomes the default table to store data**.
+* **<table pattern>**: the pattern to which the incoming event's tag (after it goes through `remove_tag_prefix`, if given). The patterns should follow the same syntax as [that of <match>](http://docs.fluentd.org/articles/config-file#match-pattern-how-you-control-the-event-flow-inside-fluentd). **Exactly one <table> element must NOT have this parameter so that it becomes the default table to store data**.
