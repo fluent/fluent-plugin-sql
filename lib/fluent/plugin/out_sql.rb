@@ -9,7 +9,7 @@ module Fluent
     config_param :port, :integer, :default => nil
     config_param :adapter, :string
     config_param :username, :string, :default => nil
-    config_param :password, :string, :default => nil
+    config_param :password, :string, :default => nil, :secret => true
     config_param :database, :string
     config_param :socket, :string, :default => nil
     config_param :remove_tag_prefix, :string, :default => nil
