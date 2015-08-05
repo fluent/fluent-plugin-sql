@@ -124,7 +124,7 @@ module Fluent
         end
 
         last_record = last_record.dup  # some plugin rewrites record :(
-        Engine.emit_stream(@tag, me)
+        router.emit_stream(@tag, me)
 
         return last_record
       end
