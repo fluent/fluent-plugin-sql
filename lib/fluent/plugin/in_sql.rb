@@ -52,7 +52,8 @@ module Fluent
         super
       end
 
-      def init(tag_prefix, base_model)
+      def init(tag_prefix, base_model, router)
+        @router = router
         @tag = "#{tag_prefix}.#{@tag}" if tag_prefix
 
         # creates a model for this table
@@ -124,7 +125,7 @@ module Fluent
         end
 
         last_record = last_record.dup  # some plugin rewrites record :(
-        router.emit_stream(@tag, me)
+        @router.emit_stream(@tag, me)
 
         return last_record
       end
@@ -202,7 +203,7 @@ module Fluent
       # ignore tables if TableElement#init failed
       @tables.reject! do |te|
         begin
-          te.init(@tag_prefix, @base_model)
+          te.init(@tag_prefix, @base_model, router)
           log.info "Selecting '#{te.table}' table"
           false
         rescue => e
