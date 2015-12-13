@@ -125,7 +125,7 @@ module Fluent
           end
         end
 
-        last_record = last_record.dup  # some plugin rewrites record :(
+        last_record = last_record.dup if last_record  # some plugin rewrites record :(
         @router.emit_stream(@tag, me)
 
         return last_record
