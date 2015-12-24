@@ -5,13 +5,21 @@ module Fluent
     include SetTimeKeyMixin
     include SetTagKeyMixin
 
+    desc 'RDBMS host'
     config_param :host, :string
+    desc 'RDBMS port'
     config_param :port, :integer, :default => nil
+    desc 'RDBMS driver name.'
     config_param :adapter, :string
+    desc 'RDBMS login user name'
     config_param :username, :string, :default => nil
+    desc 'RDBMS login password'
     config_param :password, :string, :default => nil, :secret => true
+    desc 'RDBMS database name'
     config_param :database, :string
+    desc 'RDBMS socket path'
     config_param :socket, :string, :default => nil
+    desc 'remove the given prefix from the events'
     config_param :remove_tag_prefix, :string, :default => nil
 
     attr_accessor :tables
