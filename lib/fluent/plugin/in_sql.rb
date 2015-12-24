@@ -22,17 +22,36 @@ module Fluent
   class SQLInput < Input
     Plugin.register_input('sql', self)
 
+    # For fluentd v0.12.16 or earlier
+    class << self
+      unless method_defined?(:desc)
+        def desc(description)
+        end
+      end
+    end
+
+    desc 'RDBMS host'
     config_param :host, :string
+    desc 'RDBMS port'
     config_param :port, :integer, :default => nil
+    desc 'RDBMS driver name.'
     config_param :adapter, :string
+    desc 'RDBMS database name'
     config_param :database, :string
+    desc 'RDBMS login user name'
     config_param :username, :string, :default => nil
+    desc 'RDBMS login password'
     config_param :password, :string, :default => nil, :secret => true
+    desc 'RDBMS socket path'
     config_param :socket, :string, :default => nil
 
+    desc 'path to a file to store last rows'
     config_param :state_file, :string, :default => nil
+    desc 'prefix of tags of events. actual tag will be this_tag_prefix.tables_tag (optional)'
     config_param :tag_prefix, :string, :default => nil
+    desc 'interval to run SQLs (optional)'
     config_param :select_interval, :time, :default => 60
+    desc 'limit of number of rows for each SQL(optional)'
     config_param :select_limit, :time, :default => 500
 
     unless method_defined?(:log)
