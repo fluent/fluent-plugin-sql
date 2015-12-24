@@ -5,6 +5,14 @@ module Fluent
     include SetTimeKeyMixin
     include SetTagKeyMixin
 
+    # For fluentd v0.12.16 or earlier
+    class << self
+      unless method_defined?(:desc)
+        def desc(description)
+        end
+      end
+    end
+
     desc 'RDBMS host'
     config_param :host, :string
     desc 'RDBMS port'
