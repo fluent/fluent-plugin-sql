@@ -124,7 +124,6 @@ module Fluent
         relation = relation.limit(limit) if limit > 0
 
         now = Engine.now
-        entry_name = @model.table_name.singularize
 
         me = MultiEventStream.new
         relation.each do |obj|
