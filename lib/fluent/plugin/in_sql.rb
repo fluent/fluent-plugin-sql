@@ -105,8 +105,7 @@ module Fluent
 
         # if update_column is not set, here uses primary key
         unless @update_column
-          columns = Hash[@model.columns.map {|c| [c.name, c] }]
-          pk = columns[@model.primary_key]
+          pk = @model.columns_hash[@model.primary_key]
           unless pk
             raise "Composite primary key is not supported. Set update_column parameter to <table> section."
           end
