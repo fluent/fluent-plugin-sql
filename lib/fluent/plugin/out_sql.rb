@@ -80,7 +80,7 @@ module Fluent
         @model.define_singleton_method(:model_name) { model_name }
 
         # TODO: check column_names and table schema
-        columns = @model.columns.map { |column| column.name }.sort
+        # @model.column_names
       end
 
       def import(chunk)
