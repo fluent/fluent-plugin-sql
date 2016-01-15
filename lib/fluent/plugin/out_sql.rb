@@ -215,6 +215,9 @@ module Fluent
     end
 
     def write(chunk)
+      conn = @base_model.connection
+      conn.active? || conn.reconnect!
+
       @tables.each { |table|
         if table.pattern.match(chunk.key)
           return table.import(chunk)

@@ -245,6 +245,9 @@ module Fluent
       until @stop_flag
         sleep @select_interval
 
+        conn = @base_model.connection
+        conn.active? || conn.reconnect!
+
         @tables.each do |t|
           begin
             last_record = @state_store.last_records[t.table]
