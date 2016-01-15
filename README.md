@@ -30,7 +30,7 @@ It stores last selected rows to a file (named *state\_file*) to not forget the l
 ## Input: Configuration
 
     <source>
-      type sql
+      @type sql
 
       host rdb_host
       database rdb_database
@@ -96,7 +96,7 @@ This plugin takes advantage of ActiveRecord underneath. For `host`, `port`, `dat
 ## Output: Configuration
 
     <match my.rdb.*>
-      type sql
+      @type sql
       host rdb_host
       port 3306
       database rdb_database
