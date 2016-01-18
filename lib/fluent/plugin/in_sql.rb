@@ -105,8 +105,7 @@ module Fluent
 
         # if update_column is not set, here uses primary key
         unless @update_column
-          columns = Hash[@model.columns.map {|c| [c.name, c] }]
-          pk = columns[@model.primary_key]
+          pk = @model.columns_hash[@model.primary_key]
           unless pk
             raise "Composite primary key is not supported. Set update_column parameter to <table> section."
           end
@@ -124,7 +123,6 @@ module Fluent
         relation = relation.limit(limit) if limit > 0
 
         now = Engine.now
-        entry_name = @model.table_name.singularize
 
         me = MultiEventStream.new
         relation.each do |obj|
@@ -244,6 +242,14 @@ module Fluent
     def thread_main
       until @stop_flag
         sleep @select_interval
+
+        begin
+          conn = @base_model.connection
+          conn.active? || conn.reconnect!
+        rescue => e
+          log.warn "can't connect to database. Reconnect at next try"
+          next
+        end
 
         @tables.each do |t|
           begin

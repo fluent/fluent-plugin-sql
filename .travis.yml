@@ -1,0 +1,4 @@
+sudo: false
+
+before_install:
+  - gem install bundler
