@@ -243,8 +243,13 @@ module Fluent
       until @stop_flag
         sleep @select_interval
 
-        conn = @base_model.connection
-        conn.active? || conn.reconnect!
+        begin
+          conn = @base_model.connection
+          conn.active? || conn.reconnect!
+        rescue => e
+          log.warn "can't connect to database. Reconnect at next try"
+          next
+        end
 
         @tables.each do |t|
           begin
