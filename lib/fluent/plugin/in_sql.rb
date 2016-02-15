@@ -237,6 +237,8 @@ module Fluent
 
     def shutdown
       @stop_flag = true
+      $log.debug "Waiting for thread to finish"
+      @thread.join
     end
 
     def thread_main
