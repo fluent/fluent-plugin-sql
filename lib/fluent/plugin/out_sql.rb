@@ -96,7 +96,7 @@ module Fluent
         }
         begin
           @model.import(records)
-        rescue ActiveRecord::StatementInvalid, ActiveRecord::ThrowResult, ActiveRecord::Import::MissingColumnError => e
+        rescue ActiveRecord::StatementInvalid, ActiveRecord::Import::MissingColumnError => e
           # ignore other exceptions to use Fluentd retry mechanizm
           @log.warn "Got deterministic error. Fallback to one-by-one import", :error => e.message, :error_class => e.class
           one_by_one_import(records)
@@ -108,7 +108,7 @@ module Fluent
           retries = 0
           begin
             @model.import([record])
-          rescue ActiveRecord::StatementInvalid, ActiveRecord::ThrowResult, ActiveRecord::Import::MissingColumnError => e
+          rescue ActiveRecord::StatementInvalid, ActiveRecord::Import::MissingColumnError => e
             @log.error "Got deterministic error again. Dump a record", :error => e.message, :error_class => e.class, :record => record
           rescue => e
             retries += 1
