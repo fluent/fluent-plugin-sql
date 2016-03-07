@@ -14,7 +14,7 @@ before_install:
   - gem install bundler
 
 before_script:
-  - psql -U postgresql "CREATE ROLE fluentd WITH LOGIN ENCRYPTED PASSWORD 'fluentd';"
-  - psql -U postgresql "CREATE DATABASE fluentd-test OWNER fluentd;"
+  - psql -U postgres "CREATE ROLE fluentd WITH LOGIN ENCRYPTED PASSWORD 'fluentd';"
+  - psql -U postgres "CREATE DATABASE fluentd-test OWNER fluentd;"
 
 script: bundle exec rake test
