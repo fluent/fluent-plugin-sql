@@ -21,4 +21,8 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'activerecord', "~> 4.2"
   gem.add_dependency 'activerecord-import', "~> 0.7"
   gem.add_development_dependency "rake", ">= 0.9.2"
+  gem.add_development_dependency "test-unit", "~> 3.1.0"
+  gem.add_development_dependency "test-unit-rr"
+  gem.add_development_dependency "test-unit-notify"
+  gem.add_development_dependency "pg"
 end
