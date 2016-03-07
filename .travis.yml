@@ -15,6 +15,6 @@ before_install:
 
 before_script:
   - psql -U postgres -c "CREATE ROLE fluentd WITH LOGIN ENCRYPTED PASSWORD 'fluentd';"
-  - psql -U postgres -c "CREATE DATABASE fluentd-test OWNER fluentd;"
+  - psql -U postgres -c "CREATE DATABASE fluentd_test OWNER fluentd;"
 
 script: bundle exec rake test

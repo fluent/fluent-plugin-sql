@@ -4,7 +4,7 @@ ActiveRecord::Base.establish_connection(host: "localhost",
                                         username: "fluentd",
                                         password: "fluentd",
                                         adapter: "postgresql",
-                                        database: "fluentd-test")
+                                        database: "fluentd_test")
 ActiveRecord::Schema.define(version: 20160225030107) do
   create_table "logs", force: :cascade do |t|
     t.string   "host"
