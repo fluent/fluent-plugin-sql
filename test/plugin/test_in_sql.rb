@@ -65,8 +65,8 @@ class SqlInputTest < Test::Unit::TestCase
     Message.create!(message: "message 2")
     Message.create!(message: "message 3")
 
-    d.run do
-    end
+    d.run
+
     assert_equal("db.logs", d.emits[0][0])
     expected = [
       [d.emits[0][1], "message 1"],
