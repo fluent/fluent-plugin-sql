@@ -70,4 +70,43 @@ class SqlOutputTest < Test::Unit::TestCase
     messages = model.pluck(:message).sort
     assert_equal(["message1", "message2"], messages)
   end
+
+  class Fallback < self
+    def test_simple
+      d = create_driver
+      time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+
+      d.emit({"message" => "message1"}, time)
+      d.emit({"message" => "message2"}, time)
+
+      d.run do
+        default_table = d.instance.instance_variable_get(:@default_table)
+        model = default_table.instance_variable_get(:@model)
+        mock(model).import(anything).at_least(1) do
+          raise ActiveRecord::Import::MissingColumnError.new("dummy_table", "dummy_column")
+        end
+        mock(default_table).one_by_one_import(anything)
+      end
+    end
+
+    def test_limit
+      d = create_driver
+      time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+
+      d.emit({"message" => "message1"}, time)
+      d.emit({"message" => "message2"}, time)
+
+      d.run do
+        default_table = d.instance.instance_variable_get(:@default_table)
+        model = default_table.instance_variable_get(:@model)
+        mock(model).import([anything, anything]).once do
+          raise ActiveRecord::Import::MissingColumnError.new("dummy_table", "dummy_column")
+        end
+        mock(model).import([anything]).times(12) do
+          raise StandardError
+        end
+        assert_equal(5, default_table.instance_variable_get(:@num_retries))
+      end
+    end
+  end
 end
