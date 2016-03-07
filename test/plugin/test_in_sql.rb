@@ -20,7 +20,7 @@ class SqlInputTest < Test::Unit::TestCase
     tag_prefix db
 
     <table>
-      table logs
+      table messages
       tag logs
       update_column updated_at
       time_column updated_at
@@ -54,8 +54,8 @@ class SqlInputTest < Test::Unit::TestCase
     assert_equal(expected, actual)
     tables = d.instance.instance_variable_get(:@tables)
     assert_equal(1, tables.size)
-    logs = tables.first
-    assert_equal("logs", logs.table)
-    assert_equal("logs", logs.tag)
+    messages = tables.first
+    assert_equal("messages", messages.table)
+    assert_equal("logs", messages.tag)
   end
 end
