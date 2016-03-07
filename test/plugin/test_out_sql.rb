@@ -13,7 +13,7 @@ class SqlOutputTest < Test::Unit::TestCase
     port 5432
     adapter postgresql
 
-    database fluentd-test
+    database fluentd_test
     username fluentd
     password fluentd
 
@@ -35,7 +35,7 @@ class SqlOutputTest < Test::Unit::TestCase
       host: "localhost",
       port: 5432,
       adapter: "postgresql",
-      database: "fluentd-test",
+      database: "fluentd_test",
       username: "fluentd",
       password: "fluentd",
       remove_tag_suffix: /^db/
