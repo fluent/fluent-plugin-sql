@@ -13,4 +13,8 @@ rvm:
 before_install:
   - gem install bundler
 
+before_script:
+  - psql -U postgresql "CREATE ROLE fluentd WITH LOGIN ENCRYPTED PASSWORD 'fluentd';"
+  - psql -U postgresql "CREATE DATABASE fluentd-test OWNER fluentd;"
+
 script: bundle exec rake test
