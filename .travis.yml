@@ -1,4 +1,20 @@
 sudo: false
+language: ruby
+
+addons:
+  postgresql: "9.4"
+
+rvm:
+  - 2.0.0
+  - 2.1
+  - 2.2
+  - 2.3.0
 
 before_install:
   - gem install bundler
+
+before_script:
+  - psql -U postgres -c "CREATE ROLE fluentd WITH LOGIN ENCRYPTED PASSWORD 'fluentd';"
+  - psql -U postgres -c "CREATE DATABASE fluentd_test OWNER fluentd;"
+
+script: bundle exec rake test
