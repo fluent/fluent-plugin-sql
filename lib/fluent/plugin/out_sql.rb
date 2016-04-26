@@ -189,7 +189,7 @@ module Fluent
       end
 
       SQLOutput.const_set("BaseModel_#{rand(1 << 31)}", @base_model)
-      @base_model.establish_connection(config)
+      ActiveRecord::Base.establish_connection(config)
 
       # ignore tables if TableElement#init failed
       @tables.reject! do |te|
@@ -215,15 +215,15 @@ module Fluent
     end
 
     def write(chunk)
-      conn = @base_model.connection
-      conn.active? || conn.reconnect!
+      ActiveRecord::Base.connection_pool.with_connection do
 
-      @tables.each { |table|
-        if table.pattern.match(chunk.key)
-          return table.import(chunk)
-        end
-      }
-      @default_table.import(chunk)
+        @tables.each { |table|
+          if table.pattern.match(chunk.key)
+            return table.import(chunk)
+          end
+        }
+        @default_table.import(chunk)
+      end
     end
 
     private
