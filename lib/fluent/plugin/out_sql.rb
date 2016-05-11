@@ -49,10 +49,11 @@ module Fluent
       attr_reader :model
       attr_reader :pattern
 
-      def initialize(pattern, log)
+      def initialize(pattern, log, enable_fallback)
         super()
         @pattern = MatchPattern.create(pattern)
         @log = log
+        @enable_fallback = enable_fallback
       end
 
       def configure(conf)
@@ -162,7 +163,7 @@ module Fluent
       conf.elements.select { |e|
         e.name == 'table'
       }.each { |e|
-        te = TableElement.new(e.arg, log)
+        te = TableElement.new(e.arg, log, @enable_fallback)
         te.configure(e)
         if e.arg.empty?
           $log.warn "Detect duplicate default table definition" if @default_table
