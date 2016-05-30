@@ -1,3 +1,5 @@
+require "fluent/output"
+
 module Fluent
   class SQLOutput < BufferedOutput
     Plugin.register_output('sql', self)
