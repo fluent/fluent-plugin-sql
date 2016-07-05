@@ -31,6 +31,8 @@ module Fluent
     config_param :socket, :string, :default => nil
     desc 'remove the given prefix from the events'
     config_param :remove_tag_prefix, :string, :default => nil
+    desc 'enable fallback'
+    config_param :enable_fallback, :bool, :default => true
 
     attr_accessor :tables
 
@@ -49,10 +51,11 @@ module Fluent
       attr_reader :model
       attr_reader :pattern
 
-      def initialize(pattern, log)
+      def initialize(pattern, log, enable_fallback)
         super()
         @pattern = MatchPattern.create(pattern)
         @log = log
+        @enable_fallback = enable_fallback
       end
 
       def configure(conf)
@@ -99,9 +102,14 @@ module Fluent
         begin
           @model.import(records)
         rescue ActiveRecord::StatementInvalid, ActiveRecord::Import::MissingColumnError => e
-          # ignore other exceptions to use Fluentd retry mechanizm
-          @log.warn "Got deterministic error. Fallback to one-by-one import", :error => e.message, :error_class => e.class
-          one_by_one_import(records)
+          if @enable_fallback
+            # ignore other exceptions to use Fluentd retry mechanizm
+            @log.warn "Got deterministic error. Fallback to one-by-one import", :error => e.message, :error_class => e.class
+            one_by_one_import(records)
+          else
+            $log.warn "Got deterministic error. Fallback is disabled", :error => e.message, :error_class => e.class
+            raise e
+          end
         end
       end
 
@@ -157,7 +165,7 @@ module Fluent
       conf.elements.select { |e|
         e.name == 'table'
       }.each { |e|
-        te = TableElement.new(e.arg, log)
+        te = TableElement.new(e.arg, log, @enable_fallback)
         te.configure(e)
         if e.arg.empty?
           $log.warn "Detect duplicate default table definition" if @default_table

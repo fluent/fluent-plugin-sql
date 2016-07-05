@@ -38,7 +38,8 @@ class SqlOutputTest < Test::Unit::TestCase
       database: "fluentd_test",
       username: "fluentd",
       password: "fluentd",
-      remove_tag_suffix: /^db/
+      remove_tag_suffix: /^db/,
+      enable_fallback: true
     }
     actual = {
       host: d.instance.host,
@@ -47,7 +48,8 @@ class SqlOutputTest < Test::Unit::TestCase
       database: d.instance.database,
       username: d.instance.username,
       password: d.instance.password,
-      remove_tag_suffix: d.instance.remove_tag_prefix
+      remove_tag_suffix: d.instance.remove_tag_prefix,
+      enable_fallback: d.instance.enable_fallback
     }
     assert_equal(expected, actual)
     assert_empty(d.instance.tables)
