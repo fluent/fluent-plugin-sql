@@ -16,14 +16,14 @@
 #    limitations under the License.
 #
 
-require "fluent/input"
+require "fluent/plugin/input"
 
-module Fluent
+module Fluent::Plugin
 
   require 'active_record'
 
   class SQLInput < Input
-    Plugin.register_input('sql', self)
+    Fluent::Plugin.register_input('sql', self)
 
     # For fluentd v0.12.16 or earlier
     class << self
@@ -62,7 +62,7 @@ module Fluent
     end
 
     class TableElement
-      include Configurable
+      include Fluent::Configurable
 
       config_param :table, :string
       config_param :tag, :string, :default => nil
@@ -125,9 +125,9 @@ module Fluent
         relation = relation.order("#{@update_column} ASC")
         relation = relation.limit(limit) if limit > 0
 
-        now = Engine.now
+        now = Fluent::Engine.now
 
-        me = MultiEventStream.new
+        me = Fluent::MultiEventStream.new
         relation.each do |obj|
           record = obj.serializable_hash rescue nil
           if record
