@@ -28,35 +28,35 @@ module Fluent::Plugin
     desc 'RDBMS host'
     config_param :host, :string
     desc 'RDBMS port'
-    config_param :port, :integer, :default => nil
+    config_param :port, :integer, default: nil
     desc 'RDBMS driver name.'
     config_param :adapter, :string
     desc 'RDBMS database name'
     config_param :database, :string
     desc 'RDBMS login user name'
-    config_param :username, :string, :default => nil
+    config_param :username, :string, default: nil
     desc 'RDBMS login password'
-    config_param :password, :string, :default => nil, :secret => true
+    config_param :password, :string, default: nil, secret: true
     desc 'RDBMS socket path'
-    config_param :socket, :string, :default => nil
+    config_param :socket, :string, default: nil
 
     desc 'path to a file to store last rows'
-    config_param :state_file, :string, :default => nil
+    config_param :state_file, :string, default: nil
     desc 'prefix of tags of events. actual tag will be this_tag_prefix.tables_tag (optional)'
-    config_param :tag_prefix, :string, :default => nil
+    config_param :tag_prefix, :string, default: nil
     desc 'interval to run SQLs (optional)'
-    config_param :select_interval, :time, :default => 60
+    config_param :select_interval, :time, default: 60
     desc 'limit of number of rows for each SQL(optional)'
-    config_param :select_limit, :time, :default => 500
+    config_param :select_limit, :time, default: 500
 
     class TableElement
       include Fluent::Configurable
 
       config_param :table, :string
-      config_param :tag, :string, :default => nil
-      config_param :update_column, :string, :default => nil
-      config_param :time_column, :string, :default => nil
-      config_param :primary_key, :string, :default => nil
+      config_param :tag, :string, default: nil
+      config_param :update_column, :string, default: nil
+      config_param :time_column, :string, default: nil
+      config_param :primary_key, :string, default: nil
 
       def configure(conf)
         super
@@ -167,13 +167,13 @@ module Fluent::Plugin
       @state_store = @state_file.nil? ? MemoryStateStore.new : StateStore.new(@state_file)
 
       config = {
-        :adapter => @adapter,
-        :host => @host,
-        :port => @port,
-        :database => @database,
-        :username => @username,
-        :password => @password,
-        :socket => @socket,
+        adapter: @adapter,
+        host: @host,
+        port: @port,
+        database: @database,
+        username: @username,
+        password: @password,
+        socket: @socket,
       }
 
       # creates subclass of ActiveRecord::Base so that it can have different
@@ -216,7 +216,7 @@ module Fluent::Plugin
           log.info "Selecting '#{te.table}' table"
           false
         rescue => e
-          log.warn "Can't handle '#{te.table}' table. Ignoring.", :error => e.message, :error_class => e.class
+          log.warn "Can't handle '#{te.table}' table. Ignoring.", error: e.message, error_class: e.class
           log.warn_backtrace e.backtrace
           true
         end
@@ -250,7 +250,7 @@ module Fluent::Plugin
             @state_store.last_records[t.table] = t.emit_next_records(last_record, @select_limit)
             @state_store.update!
           rescue => e
-            log.error "unexpected error", :error => e.message, :error_class => e.class
+            log.error "unexpected error", error: e.message, error_class: e.class
             log.error_backtrace e.backtrace
           end
         end

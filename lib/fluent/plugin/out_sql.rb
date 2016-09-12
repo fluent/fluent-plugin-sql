@@ -11,21 +11,21 @@ module Fluent::Plugin
     desc 'RDBMS host'
     config_param :host, :string
     desc 'RDBMS port'
-    config_param :port, :integer, :default => nil
+    config_param :port, :integer, default: nil
     desc 'RDBMS driver name.'
     config_param :adapter, :string
     desc 'RDBMS login user name'
-    config_param :username, :string, :default => nil
+    config_param :username, :string, default: nil
     desc 'RDBMS login password'
-    config_param :password, :string, :default => nil, :secret => true
+    config_param :password, :string, default: nil, secret: true
     desc 'RDBMS database name'
     config_param :database, :string
     desc 'RDBMS socket path'
-    config_param :socket, :string, :default => nil
+    config_param :socket, :string, default: nil
     desc 'remove the given prefix from the events'
-    config_param :remove_tag_prefix, :string, :default => nil
+    config_param :remove_tag_prefix, :string, default: nil
     desc 'enable fallback'
-    config_param :enable_fallback, :bool, :default => true
+    config_param :enable_fallback, :bool, default: true
 
     config_section :buffer do
       config_set_default :@type, DEFAULT_BUFFER_TYPE
@@ -39,7 +39,7 @@ module Fluent::Plugin
 
       config_param :table, :string
       config_param :column_mapping, :string
-      config_param :num_retries, :integer, :default => 5
+      config_param :num_retries, :integer, default: 5
 
       attr_reader :model
       attr_reader :pattern
@@ -88,7 +88,7 @@ module Fluent::Plugin
             # format process should be moved to emit / format after supports error stream.
             records << @model.new(@format_proc.call(data))
           rescue => e
-            args = {:error => e.message, :error_class => e.class, :table => @table, :record => Yajl.dump(data)}
+            args = {error: e.message, error_class: e.class, table: @table, record: Yajl.dump(data)}
             @log.warn "Failed to create the model. Ignore a record:", args
           end
         }
@@ -97,10 +97,10 @@ module Fluent::Plugin
         rescue ActiveRecord::StatementInvalid, ActiveRecord::Import::MissingColumnError => e
           if @enable_fallback
             # ignore other exceptions to use Fluentd retry mechanizm
-            @log.warn "Got deterministic error. Fallback to one-by-one import", :error => e.message, :error_class => e.class
+            @log.warn "Got deterministic error. Fallback to one-by-one import", error: e.message, error_class: e.class
             one_by_one_import(records)
           else
-            $log.warn "Got deterministic error. Fallback is disabled", :error => e.message, :error_class => e.class
+            $log.warn "Got deterministic error. Fallback is disabled", error: e.message, error_class: e.class
             raise e
           end
         end
@@ -112,15 +112,15 @@ module Fluent::Plugin
           begin
             @model.import([record])
           rescue ActiveRecord::StatementInvalid, ActiveRecord::Import::MissingColumnError => e
-            @log.error "Got deterministic error again. Dump a record", :error => e.message, :error_class => e.class, :record => record
+            @log.error "Got deterministic error again. Dump a record", error: e.message, error_class: e.class, record: record
           rescue => e
             retries += 1
             if retries > @num_retries
-              @log.error "Can't recover undeterministic error. Dump a record", :error => e.message, :error_class => e.class, :record => record
+              @log.error "Can't recover undeterministic error. Dump a record", error: e.message, error_class: e.class, record: record
               next
             end
 
-            @log.warn "Failed to import a record: retry number = #{retries}", :error  => e.message, :error_class => e.class
+            @log.warn "Failed to import a record: retry number = #{retries}", error: e.message, error_class: e.class
             sleep 0.5
             retry
           end
@@ -180,13 +180,13 @@ module Fluent::Plugin
       super
 
       config = {
-        :adapter => @adapter,
-        :host => @host,
-        :port => @port,
-        :database => @database,
-        :username => @username,
-        :password => @password,
-        :socket => @socket,
+        adapter: @adapter,
+        host: @host,
+        port: @port,
+        database: @database,
+        username: @username,
+        password: @password,
+        socket: @socket,
       }
 
       @base_model = Class.new(ActiveRecord::Base) do
@@ -240,7 +240,7 @@ module Fluent::Plugin
         log.info "Selecting '#{te.table}' table"
         false
       rescue => e
-        log.warn "Can't handle '#{te.table}' table. Ignoring.", :error => e.message, :error_class => e.class
+        log.warn "Can't handle '#{te.table}' table. Ignoring.", error: e.message, error_class: e.class
         log.warn_backtrace e.backtrace
         true
       end
