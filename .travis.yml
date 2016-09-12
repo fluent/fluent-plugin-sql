@@ -13,7 +13,6 @@ rvm:
 
 gemfile:
  - Gemfile
- - Gemfile.v0.12
 
 before_install:
   - gem install bundler
