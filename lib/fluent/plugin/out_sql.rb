@@ -1,11 +1,11 @@
-require "fluent/output"
+require "fluent/plugin/output"
 
-module Fluent
-  class SQLOutput < BufferedOutput
-    Plugin.register_output('sql', self)
+module Fluent::Plugin
+  class SQLOutput < Output
+    Fluent::Plugin.register_output('sql', self)
 
-    include SetTimeKeyMixin
-    include SetTagKeyMixin
+    include Fluent::SetTimeKeyMixin
+    include Fluent::SetTagKeyMixin
 
     # For fluentd v0.12.16 or earlier
     class << self
@@ -42,7 +42,7 @@ module Fluent
 
     # TODO: Merge SQLInput's TableElement
     class TableElement
-      include Configurable
+      include Fluent::Configurable
 
       config_param :table, :string
       config_param :column_mapping, :string
@@ -53,7 +53,7 @@ module Fluent
 
       def initialize(pattern, log, enable_fallback)
         super()
-        @pattern = MatchPattern.create(pattern)
+        @pattern = Fluent::MatchPattern.create(pattern)
         @log = log
         @enable_fallback = enable_fallback
       end
@@ -177,7 +177,7 @@ module Fluent
       @only_default = @tables.empty?
 
       if @default_table.nil?
-        raise ConfigError, "There is no default table. <table> is required in sql output"
+        raise Fluent::ConfigError, "There is no default table. <table> is required in sql output"
       end
     end
 
