@@ -25,14 +25,6 @@ module Fluent::Plugin
   class SQLInput < Input
     Fluent::Plugin.register_input('sql', self)
 
-    # For fluentd v0.12.16 or earlier
-    class << self
-      unless method_defined?(:desc)
-        def desc(description)
-        end
-      end
-    end
-
     desc 'RDBMS host'
     config_param :host, :string
     desc 'RDBMS port'
@@ -56,10 +48,6 @@ module Fluent::Plugin
     config_param :select_interval, :time, :default => 60
     desc 'limit of number of rows for each SQL(optional)'
     config_param :select_limit, :time, :default => 500
-
-    unless method_defined?(:log)
-      define_method(:log) { $log }
-    end
 
     class TableElement
       include Fluent::Configurable

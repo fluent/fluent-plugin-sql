@@ -4,15 +4,9 @@ module Fluent::Plugin
   class SQLOutput < Output
     Fluent::Plugin.register_output('sql', self)
 
-    helpers :inject, :compat_parameters, :event_emitter
+    DEFAULT_BUFFER_TYPE = "memory"
 
-    # For fluentd v0.12.16 or earlier
-    class << self
-      unless method_defined?(:desc)
-        def desc(description)
-        end
-      end
-    end
+    helpers :inject, :compat_parameters, :event_emitter
 
     desc 'RDBMS host'
     config_param :host, :string
@@ -33,11 +27,11 @@ module Fluent::Plugin
     desc 'enable fallback'
     config_param :enable_fallback, :bool, :default => true
 
-    attr_accessor :tables
-
-    unless method_defined?(:log)
-      define_method(:log) { $log }
+    config_section :buffer do
+      config_set_default :@type, DEFAULT_BUFFER_TYPE
     end
+
+    attr_accessor :tables
 
     # TODO: Merge SQLInput's TableElement
     class TableElement
