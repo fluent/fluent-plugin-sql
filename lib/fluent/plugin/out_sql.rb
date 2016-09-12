@@ -4,7 +4,7 @@ module Fluent::Plugin
   class SQLOutput < Output
     Fluent::Plugin.register_output('sql', self)
 
-    helpers :inject, :compat_parameters
+    helpers :inject, :compat_parameters, :event_emitter
 
     # For fluentd v0.12.16 or earlier
     class << self
