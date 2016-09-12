@@ -4,8 +4,7 @@ module Fluent::Plugin
   class SQLOutput < Output
     Fluent::Plugin.register_output('sql', self)
 
-    include Fluent::SetTimeKeyMixin
-    include Fluent::SetTagKeyMixin
+    helpers :inject, :compat_parameters
 
     # For fluentd v0.12.16 or earlier
     class << self
@@ -154,6 +153,8 @@ module Fluent::Plugin
     end
 
     def configure(conf)
+      compat_parameters_convert(conf, :inject)
+
       super
 
       if remove_tag_prefix = conf['remove_tag_prefix']
@@ -221,6 +222,7 @@ module Fluent::Plugin
     end
 
     def format(tag, time, record)
+      record = inject_values_to_record(tag, time, record)
       [tag, time, record].to_msgpack
     end
 
