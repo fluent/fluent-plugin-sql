@@ -216,7 +216,7 @@ module Fluent::Plugin
           log.info "Selecting '#{te.table}' table"
           false
         rescue => e
-          log.warn "Can't handle '#{te.table}' table. Ignoring.", error: e.message, error_class: e.class
+          log.warn "Can't handle '#{te.table}' table. Ignoring.", error: e
           log.warn_backtrace e.backtrace
           true
         end
@@ -250,7 +250,7 @@ module Fluent::Plugin
             @state_store.last_records[t.table] = t.emit_next_records(last_record, @select_limit)
             @state_store.update!
           rescue => e
-            log.error "unexpected error", error: e.message, error_class: e.class
+            log.error "unexpected error", error: e
             log.error_backtrace e.backtrace
           end
         end

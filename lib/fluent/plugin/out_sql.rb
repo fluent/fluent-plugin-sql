@@ -88,7 +88,7 @@ module Fluent::Plugin
             # format process should be moved to emit / format after supports error stream.
             records << @model.new(@format_proc.call(data))
           rescue => e
-            args = {error: e.message, error_class: e.class, table: @table, record: Yajl.dump(data)}
+            args = {error: e, table: @table, record: Yajl.dump(data)}
             @log.warn "Failed to create the model. Ignore a record:", args
           end
         }
@@ -97,10 +97,10 @@ module Fluent::Plugin
         rescue ActiveRecord::StatementInvalid, ActiveRecord::Import::MissingColumnError => e
           if @enable_fallback
             # ignore other exceptions to use Fluentd retry mechanizm
-            @log.warn "Got deterministic error. Fallback to one-by-one import", error: e.message, error_class: e.class
+            @log.warn "Got deterministic error. Fallback to one-by-one import", error: e
             one_by_one_import(records)
           else
-            $log.warn "Got deterministic error. Fallback is disabled", error: e.message, error_class: e.class
+            $log.warn "Got deterministic error. Fallback is disabled", error: e
             raise e
           end
         end
@@ -112,15 +112,15 @@ module Fluent::Plugin
           begin
             @model.import([record])
           rescue ActiveRecord::StatementInvalid, ActiveRecord::Import::MissingColumnError => e
-            @log.error "Got deterministic error again. Dump a record", error: e.message, error_class: e.class, record: record
+            @log.error "Got deterministic error again. Dump a record", error: e, record: record
           rescue => e
             retries += 1
             if retries > @num_retries
-              @log.error "Can't recover undeterministic error. Dump a record", error: e.message, error_class: e.class, record: record
+              @log.error "Can't recover undeterministic error. Dump a record", error: e, record: record
               next
             end
 
-            @log.warn "Failed to import a record: retry number = #{retries}", error: e.message, error_class: e.class
+            @log.warn "Failed to import a record: retry number = #{retries}", error: e
             sleep 0.5
             retry
           end
@@ -240,7 +240,7 @@ module Fluent::Plugin
         log.info "Selecting '#{te.table}' table"
         false
       rescue => e
-        log.warn "Can't handle '#{te.table}' table. Ignoring.", error: e.message, error_class: e.class
+        log.warn "Can't handle '#{te.table}' table. Ignoring.", error: e
         log.warn_backtrace e.backtrace
         true
       end
