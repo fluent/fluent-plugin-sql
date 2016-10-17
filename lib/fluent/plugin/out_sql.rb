@@ -220,6 +220,10 @@ module Fluent::Plugin
       [tag, time, record].to_msgpack
     end
 
+    def formatted_to_msgpack_binary
+      true
+    end
+
     def write(chunk)
       ActiveRecord::Base.connection_pool.with_connection do
 
