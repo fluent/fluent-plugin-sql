@@ -92,6 +92,8 @@ module Fluent
             v = send(n)
             if v.respond_to?(:to_msgpack)
               v
+            elsif v.is_a? Time
+              v.strftime('%Y-%m-%d %H:%M:%S.%6N%z')
             else
               v.to_s
             end
