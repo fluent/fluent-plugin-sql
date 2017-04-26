@@ -101,7 +101,7 @@ module Fluent
         end
 
         # ActiveRecord requires model class to have a name.
-        class_name = table_name.singularize.camelize
+        class_name = table_name.gsub(/\./, "_").singularize.camelize
         base_model.const_set(class_name, @model)
 
         # Sets model_name otherwise ActiveRecord causes errors
