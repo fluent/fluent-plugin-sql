@@ -7,6 +7,15 @@ This SQL plugin has two parts:
 1. SQL **input** plugin reads records from RDBMSes periodically. An example use case would be getting "diffs" of a table (based on the "updated_at" field).
 2. SQL **output** plugin that writes records into RDBMes. An example use case would be aggregating server/app/sensor logs into RDBMS systems.
 
+## Requirements
+
+| fluent-plugin-sql | fluentd    | ruby   |
+|-------------------|------------|--------|
+| >= 1.0.0          | >= v0.14.4 | >= 2.1 |
+| <  1.0.0          | <  v0.14.0 | >= 1.9 |
+
+NOTE: fluent-plugin-sql v1.0.0 is now RC. We will release stable v1.0.0 soon.
+
 ## Installation
 
     $ fluent-gem install fluent-plugin-sql --no-document
