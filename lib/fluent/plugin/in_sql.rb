@@ -16,59 +16,47 @@
 #    limitations under the License.
 #
 
-require "fluent/input"
+require "fluent/plugin/input"
 
-module Fluent
+module Fluent::Plugin
 
   require 'active_record'
 
   class SQLInput < Input
-    Plugin.register_input('sql', self)
-
-    # For fluentd v0.12.16 or earlier
-    class << self
-      unless method_defined?(:desc)
-        def desc(description)
-        end
-      end
-    end
+    Fluent::Plugin.register_input('sql', self)
 
     desc 'RDBMS host'
     config_param :host, :string
     desc 'RDBMS port'
-    config_param :port, :integer, :default => nil
+    config_param :port, :integer, default: nil
     desc 'RDBMS driver name.'
     config_param :adapter, :string
     desc 'RDBMS database name'
     config_param :database, :string
     desc 'RDBMS login user name'
-    config_param :username, :string, :default => nil
+    config_param :username, :string, default: nil
     desc 'RDBMS login password'
-    config_param :password, :string, :default => nil, :secret => true
+    config_param :password, :string, default: nil, secret: true
     desc 'RDBMS socket path'
-    config_param :socket, :string, :default => nil
+    config_param :socket, :string, default: nil
 
     desc 'path to a file to store last rows'
-    config_param :state_file, :string, :default => nil
+    config_param :state_file, :string, default: nil
     desc 'prefix of tags of events. actual tag will be this_tag_prefix.tables_tag (optional)'
-    config_param :tag_prefix, :string, :default => nil
+    config_param :tag_prefix, :string, default: nil
     desc 'interval to run SQLs (optional)'
-    config_param :select_interval, :time, :default => 60
+    config_param :select_interval, :time, default: 60
     desc 'limit of number of rows for each SQL(optional)'
-    config_param :select_limit, :time, :default => 500
-
-    unless method_defined?(:log)
-      define_method(:log) { $log }
-    end
+    config_param :select_limit, :time, default: 500
 
     class TableElement
-      include Configurable
+      include Fluent::Configurable
 
       config_param :table, :string
-      config_param :tag, :string, :default => nil
-      config_param :update_column, :string, :default => nil
-      config_param :time_column, :string, :default => nil
-      config_param :primary_key, :string, :default => nil
+      config_param :tag, :string, default: nil
+      config_param :update_column, :string, default: nil
+      config_param :time_column, :string, default: nil
+      config_param :primary_key, :string, default: nil
 
       def configure(conf)
         super
@@ -127,9 +115,9 @@ module Fluent
         relation = relation.order("#{@update_column} ASC")
         relation = relation.limit(limit) if limit > 0
 
-        now = Engine.now
+        now = Fluent::Engine.now
 
-        me = MultiEventStream.new
+        me = Fluent::MultiEventStream.new
         relation.each do |obj|
           record = obj.serializable_hash rescue nil
           if record
@@ -181,13 +169,13 @@ module Fluent
       @state_store = @state_file.nil? ? MemoryStateStore.new : StateStore.new(@state_file)
 
       config = {
-        :adapter => @adapter,
-        :host => @host,
-        :port => @port,
-        :database => @database,
-        :username => @username,
-        :password => @password,
-        :socket => @socket,
+        adapter: @adapter,
+        host: @host,
+        port: @port,
+        database: @database,
+        username: @username,
+        password: @password,
+        socket: @socket,
       }
 
       # creates subclass of ActiveRecord::Base so that it can have different
@@ -230,7 +218,7 @@ module Fluent
           log.info "Selecting '#{te.table}' table"
           false
         rescue => e
-          log.warn "Can't handle '#{te.table}' table. Ignoring.", :error => e.message, :error_class => e.class
+          log.warn "Can't handle '#{te.table}' table. Ignoring.", error: e
           log.warn_backtrace e.backtrace
           true
         end
@@ -264,7 +252,7 @@ module Fluent
             @state_store.last_records[t.table] = t.emit_next_records(last_record, @select_limit)
             @state_store.update!
           rescue => e
-            log.error "unexpected error", :error => e.message, :error_class => e.class
+            log.error "unexpected error", error: e
             log.error_backtrace e.backtrace
           end
         end

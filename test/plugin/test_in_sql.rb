@@ -1,4 +1,5 @@
 require "helper"
+require "fluent/test/driver/input"
 
 class SqlInputTest < Test::Unit::TestCase
   def setup
@@ -28,7 +29,7 @@ class SqlInputTest < Test::Unit::TestCase
   ]
 
   def create_driver(conf = CONFIG)
-    Fluent::Test::InputTestDriver.new(Fluent::SQLInput).configure(conf)
+    Fluent::Test::Driver::Input.new(Fluent::Plugin::SQLInput).configure(conf)
   end
 
   def test_configure
@@ -65,18 +66,21 @@ class SqlInputTest < Test::Unit::TestCase
     Message.create!(message: "message 2")
     Message.create!(message: "message 3")
 
+    d.end_if do
+      d.record_count >= 3
+    end
     d.run
 
-    assert_equal("db.logs", d.emits[0][0])
+    assert_equal("db.logs", d.events[0][0])
     expected = [
-      [d.emits[0][1], "message 1"],
-      [d.emits[1][1], "message 2"],
-      [d.emits[2][1], "message 3"],
+      [d.events[0][1], "message 1"],
+      [d.events[1][1], "message 2"],
+      [d.events[2][1], "message 3"],
     ]
     actual = [
-      [Time.parse(d.emits[0][2]["updated_at"]).to_i, d.emits[0][2]["message"]],
-      [Time.parse(d.emits[1][2]["updated_at"]).to_i, d.emits[1][2]["message"]],
-      [Time.parse(d.emits[2][2]["updated_at"]).to_i, d.emits[2][2]["message"]],
+      [Time.parse(d.events[0][2]["updated_at"]).to_i, d.events[0][2]["message"]],
+      [Time.parse(d.events[1][2]["updated_at"]).to_i, d.events[1][2]["message"]],
+      [Time.parse(d.events[2][2]["updated_at"]).to_i, d.events[2][2]["message"]],
     ]
     assert_equal(expected, actual)
   end
