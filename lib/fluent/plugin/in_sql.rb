@@ -81,7 +81,7 @@ module Fluent::Plugin
             if v.respond_to?(:to_msgpack)
               v
             elsif v.is_a? Time
-              v.strftime('%Y-%m-%d %H:%M:%S.%6N%z')
+              v.strftime('%Y-%m-%d %H:%M:%S.%6N')
             else
               v.to_s
             end
