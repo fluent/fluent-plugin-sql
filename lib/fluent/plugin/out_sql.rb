@@ -46,6 +46,7 @@ module Fluent
 
       config_param :table, :string
       config_param :column_mapping, :string
+      config_param :primary_key, :string, :default => :id
       config_param :num_retries, :integer, :default => 5
 
       attr_reader :model
@@ -74,8 +75,10 @@ module Fluent
       def init(base_model)
         # See SQLInput for more details of following code
         table_name = @table
+        primary_key = @primary_key
         @model = Class.new(base_model) do
           self.table_name = table_name
+          self.primary_key = primary_key
           self.inheritance_column = '_never_use_output_'
         end
 
