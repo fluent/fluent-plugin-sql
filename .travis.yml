@@ -5,18 +5,18 @@ addons:
   postgresql: "9.4"
 
 rvm:
-  - 2.0
   - 2.1
-  - 2.2.4
-  - 2.3.1
-  - 2.4.1
+  - 2.2.9
+  - 2.3.6
+  - 2.4.3
+  - 2.5.0
   - ruby-head
 
 gemfile:
  - Gemfile
 
 before_install:
-  - gem install bundler
+  - gem update --system
 
 before_script:
   - psql -U postgres -c "CREATE ROLE fluentd WITH LOGIN ENCRYPTED PASSWORD 'fluentd';"
@@ -27,6 +27,3 @@ script: bundle exec rake test
 matrix:
   allow_failures:
     - rvm: ruby-head
-  exclude:
-    - rvm: 2.0
-      gemfile: Gemfile
