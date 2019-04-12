@@ -5,7 +5,7 @@
 This SQL plugin has two parts:
 
 1. SQL **input** plugin reads records from RDBMSes periodically. An example use case would be getting "diffs" of a table (based on the "updated_at" field).
-2. SQL **output** plugin that writes records into RDBMes. An example use case would be aggregating server/app/sensor logs into RDBMS systems.
+2. SQL **output** plugin that writes records into RDBMSes. An example use case would be aggregating server/app/sensor logs into RDBMS systems.
 
 ## Requirements
 
