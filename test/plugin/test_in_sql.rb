@@ -18,6 +18,8 @@ class SqlInputTest < Test::Unit::TestCase
     username fluentd
     password fluentd
 
+    schema_search_path public
+
     tag_prefix db
 
     <table>
@@ -41,6 +43,7 @@ class SqlInputTest < Test::Unit::TestCase
       database: "fluentd_test",
       username: "fluentd",
       password: "fluentd",
+      schema_search_path: "public",
       tag_prefix: "db"
     }
     actual = {
@@ -50,6 +53,7 @@ class SqlInputTest < Test::Unit::TestCase
       database: d.instance.database,
       username: d.instance.username,
       password: d.instance.password,
+      schema_search_path: d.instance.schema_search_path,
       tag_prefix: d.instance.tag_prefix
     }
     assert_equal(expected, actual)
