@@ -22,6 +22,8 @@ module Fluent::Plugin
     config_param :database, :string
     desc 'RDBMS socket path'
     config_param :socket, :string, default: nil
+    desc 'PostgreSQL schema search path'
+    config_param :schema_search_path, :string, default: nil
     desc 'remove the given prefix from the events'
     config_param :remove_tag_prefix, :string, default: nil
     desc 'enable fallback'
@@ -187,6 +189,7 @@ module Fluent::Plugin
         username: @username,
         password: @password,
         socket: @socket,
+        schema_search_path: @schema_search_path,
       }
 
       @base_model = Class.new(ActiveRecord::Base) do
