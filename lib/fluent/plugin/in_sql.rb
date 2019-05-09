@@ -39,6 +39,8 @@ module Fluent::Plugin
     config_param :password, :string, default: nil, secret: true
     desc 'RDBMS socket path'
     config_param :socket, :string, default: nil
+    desc 'PostgreSQL schema search path'
+    config_param :schema_search_path, :string, default: nil
 
     desc 'path to a file to store last rows'
     config_param :state_file, :string, default: nil
@@ -176,6 +178,7 @@ module Fluent::Plugin
         username: @username,
         password: @password,
         socket: @socket,
+        schema_search_path: @schema_search_path,
       }
 
       # creates subclass of ActiveRecord::Base so that it can have different
