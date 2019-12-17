@@ -14,19 +14,16 @@ This SQL plugin has two parts:
 | >= 1.0.0          | >= v0.14.4 | >= 2.1 |
 | <  1.0.0          | <  v0.14.0 | >= 1.9 |
 
-NOTE: fluent-plugin-sql v1.0.0 is now RC. We will release stable v1.0.0 soon.
-
 ## Installation
 
     $ fluent-gem install fluent-plugin-sql --no-document
-    $ fluent-gem install pg -v 0.21.0 --no-document # for postgresql
+    $ fluent-gem install pg --no-document # for postgresql
 
 You should install actual RDBMS driver gem together. `pg` gem for postgresql adapter or `mysql2` gem for `mysql2` adapter. Other adapters supported by [ActiveRecord](https://github.com/rails/rails/tree/master/activerecord) should work.
 
 We recommend that mysql2 gem is higher than `0.3.12` and pg gem is higher than `0.16.0`.
 
-We must use pg gem 0.21.0 (< 1.0.0) because ActiveRecord 5.0 or later doesn't support Ruby 2.1.
-NOTE: ActiveRecord has supported pg 1.0.0 since ActiveRecord 5.1.5.
+If you use ruby 2.1, use pg gem 0.21.0 (< 1.0.0) because ActiveRecord 5.1.4 or earlier doesn't support Ruby 2.1.
 
 ## Input: How It Works
 
