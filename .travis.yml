@@ -15,7 +15,7 @@ gemfile:
  - Gemfile
 
 before_install:
-  - gem update --system
+  - gem update bundler
 
 before_script:
   - psql -U postgres -c "CREATE ROLE fluentd WITH LOGIN ENCRYPTED PASSWORD 'fluentd';"
