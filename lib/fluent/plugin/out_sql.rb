@@ -28,6 +28,9 @@ module Fluent::Plugin
     config_param :remove_tag_prefix, :string, default: nil
     desc 'enable fallback'
     config_param :enable_fallback, :bool, default: true
+    config_param :pool, :integer, default: 10
+    desc "specifies the timeout to establish a new connection to the database before failing"
+    config_param :timeout, :integer, default: 5000
 
     config_section :buffer do
       config_set_default :@type, DEFAULT_BUFFER_TYPE
@@ -194,6 +197,8 @@ module Fluent::Plugin
         password: @password,
         socket: @socket,
         schema_search_path: @schema_search_path,
+        pool: @pool,
+        timeout: @timeout,
       }
 
       @base_model = Class.new(ActiveRecord::Base) do
