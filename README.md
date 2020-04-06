@@ -148,11 +148,12 @@ This plugin takes advantage of ActiveRecord underneath. For `host`, `port`, `dat
 * **username** RDBMS login user name
 * **password** RDBMS login password
 * **socket** RDBMS socket path
+* **pool** A connection pool synchronizes thread access to a limited number of database connections
+* **timeout** RDBMS connection timeout
 * **remove_tag_prefix** remove the given prefix from the events. See "tag_prefix" in "Input: Configuration". (optional)
 
 \<table\> sections:
 
 * **table** RDBM table name
 * **column_mapping**: [Required] Record to table schema mapping. The format is consists of `from:to` or `key` values are separated by `,`. For example, if set 'item_id:id,item_text:data,updated_at' to **column_mapping**, `item_id` field of record is stored into `id` column and `updated_at` field of record is stored into `updated_at` column.
-* **primary_key** RDBMS table primary key
 * **\<table pattern\>**: the pattern to which the incoming event's tag (after it goes through `remove_tag_prefix`, if given). The patterns should follow the same syntax as [that of \<match\>](https://docs.fluentd.org/configuration/config-file#how-match-patterns-work). **Exactly one \<table\> element must NOT have this parameter so that it becomes the default table to store data**.
