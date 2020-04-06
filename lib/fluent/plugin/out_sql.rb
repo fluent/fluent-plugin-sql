@@ -44,7 +44,6 @@ module Fluent::Plugin
 
       config_param :table, :string
       config_param :column_mapping, :string
-      config_param :primary_key, :string , default: nil
       config_param :num_retries, :integer, default: 5
 
       attr_reader :model
@@ -73,9 +72,6 @@ module Fluent::Plugin
       def init(base_model)
         # See SQLInput for more details of following code
         table_name = @table
-        if @primary_key!=nil then
-          self.primary_key = @primary_key
-        end
         @model = Class.new(base_model) do
           self.table_name = table_name
           self.inheritance_column = '_never_use_output_'
