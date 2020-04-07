@@ -70,7 +70,7 @@ module Fluent::Plugin
       def init(base_model)
         # See SQLInput for more details of following code
         table_name = @table
-        if @primary_key!=nil then
+        unless @primary_key.nil?
           self.primary_key = @primary_key
         end
         @model = Class.new(base_model) do
