@@ -43,7 +43,8 @@ class SqlOutputTest < Test::Unit::TestCase
       password: "fluentd",
       schema_search_path: 'public',
       remove_tag_suffix: /^db/,
-      enable_fallback: true
+      enable_fallback: true,
+      pool: 5
     }
     actual = {
       host: d.instance.host,
@@ -54,7 +55,8 @@ class SqlOutputTest < Test::Unit::TestCase
       password: d.instance.password,
       schema_search_path: d.instance.schema_search_path,
       remove_tag_suffix: d.instance.remove_tag_prefix,
-      enable_fallback: d.instance.enable_fallback
+      enable_fallback: d.instance.enable_fallback,
+      pool: d.instance.pool
     }
     assert_equal(expected, actual)
     assert_empty(d.instance.tables)

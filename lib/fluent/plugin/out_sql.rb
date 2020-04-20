@@ -29,7 +29,8 @@ module Fluent::Plugin
     config_param :remove_tag_prefix, :string, default: nil
     desc 'enable fallback'
     config_param :enable_fallback, :bool, default: true
-    config_param :pool, :integer, default: 10
+    desc "size of ActiveRecord's connection pool"
+    config_param :pool, :integer, default: 5
     desc "specifies the timeout to establish a new connection to the database before failing"
     config_param :timeout, :integer, default: 5000
 
@@ -174,6 +175,10 @@ module Fluent::Plugin
           @tables << te
         end
       }
+
+      if @pool < @buffer_config.flush_thread_count
+        log.warn "connection pool size is smaller than buffer's flush_thread_count. Recommend to increase pool value", :pool => @pool, :flush_thread_count => @buffer_config.flush_thread_count
+      end
 
       if @default_table.nil?
         raise Fluent::ConfigError, "There is no default table. <table> is required in sql output"
