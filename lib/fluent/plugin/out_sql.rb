@@ -1,10 +1,11 @@
 require "fluent/plugin/output"
 
+require 'active_record'
+require 'activerecord-import'
+
 module Fluent::Plugin
   class SQLOutput < Output
     Fluent::Plugin.register_output('sql', self)
-
-    DEFAULT_BUFFER_TYPE = "memory"
 
     helpers :inject, :compat_parameters, :event_emitter
 
@@ -30,7 +31,7 @@ module Fluent::Plugin
     config_param :enable_fallback, :bool, default: true
 
     config_section :buffer do
-      config_set_default :@type, DEFAULT_BUFFER_TYPE
+      config_set_default :chunk_keys, ["tag"]
     end
 
     attr_accessor :tables
@@ -83,10 +84,12 @@ module Fluent::Plugin
         # @model.column_names
       end
 
-      def import(chunk)
+      def import(chunk, output)
+        tag = chunk.metadata.tag
         records = []
-        chunk.msgpack_each { |tag, time, data|
+        chunk.msgpack_each { |time, data|
           begin
+            data = output.inject_values_to_record(tag, time, data)
             # format process should be moved to emit / format after supports error stream.
             records << @model.new(@format_proc.call(data))
           rescue => e
@@ -144,8 +147,6 @@ module Fluent::Plugin
 
     def initialize
       super
-      require 'active_record'
-      require 'activerecord-import'
     end
 
     def configure(conf)
@@ -210,19 +211,6 @@ module Fluent::Plugin
       super
     end
 
-    def emit(tag, es, chain)
-      if @only_default
-        super(tag, es, chain)
-      else
-        super(tag, es, chain, format_tag(tag))
-      end
-    end
-
-    def format(tag, time, record)
-      record = inject_values_to_record(tag, time, record)
-      [tag, time, record].to_msgpack
-    end
-
     def formatted_to_msgpack_binary
       true
     end
@@ -231,11 +219,12 @@ module Fluent::Plugin
       ActiveRecord::Base.connection_pool.with_connection do
 
         @tables.each { |table|
-          if table.pattern.match(chunk.key)
-            return table.import(chunk)
+          tag = format_tag(chunk.metadata.tag)
+          if table.pattern.match(tag)
+            return table.import(chunk, self)
           end
         }
-        @default_table.import(chunk)
+        @default_table.import(chunk, self)
       end
     end
 
@@ -254,7 +243,7 @@ module Fluent::Plugin
     end
 
     def format_tag(tag)
-      if @remove_tag_prefix
+      if tag && @remove_tag_prefix
         tag.gsub(@remove_tag_prefix, '')
       else
         tag
