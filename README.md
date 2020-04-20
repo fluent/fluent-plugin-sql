@@ -148,6 +148,8 @@ This plugin takes advantage of ActiveRecord underneath. For `host`, `port`, `dat
 * **username** RDBMS login user name
 * **password** RDBMS login password
 * **socket** RDBMS socket path
+* **pool** A connection pool synchronizes thread access to a limited number of database connections
+* **timeout** RDBMS connection timeout
 * **remove_tag_prefix** remove the given prefix from the events. See "tag_prefix" in "Input: Configuration". (optional)
 
 \<table\> sections:
