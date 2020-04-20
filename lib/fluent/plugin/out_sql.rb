@@ -90,7 +90,6 @@ module Fluent::Plugin
         chunk.msgpack_each { |time, data|
           begin
             data = output.inject_values_to_record(tag, time, data)
-            # format process should be moved to emit / format after supports error stream.
             records << @model.new(@format_proc.call(data))
           rescue => e
             args = {error: e, table: @table, record: Yajl.dump(data)}
@@ -105,7 +104,7 @@ module Fluent::Plugin
             @log.warn "Got deterministic error. Fallback to one-by-one import", error: e
             one_by_one_import(records)
           else
-            $log.warn "Got deterministic error. Fallback is disabled", error: e
+            @log.warn "Got deterministic error. Fallback is disabled", error: e
             raise e
           end
         end
@@ -172,7 +171,6 @@ module Fluent::Plugin
           @tables << te
         end
       }
-      @only_default = @tables.empty?
 
       if @default_table.nil?
         raise Fluent::ConfigError, "There is no default table. <table> is required in sql output"
