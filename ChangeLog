@@ -1,0 +1,16 @@
+Release 2.0.0 - 2020/04/22
+
+  * out_sql: Remove v0.12 API code and use full v1 API. Change buffer format.
+
+Release 1.1.1 - 2019/05/10
+
+  * out_sql: Support schema_search_path option of PostgreSQL
+
+Release 1.1.0 - 2018/10/04
+
+  * Upgrade ActiveRecord to 5.1
+
+Release 1.0.0 - 2018/04/06
+
+  * Support v1 API
+
