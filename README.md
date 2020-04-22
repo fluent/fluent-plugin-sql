@@ -14,6 +14,8 @@ This SQL plugin has two parts:
 | >= 1.0.0          | >= v0.14.4 | >= 2.1 |
 | <  1.0.0          | <  v0.14.0 | >= 1.9 |
 
+NOTE: fluent-plugin-sql v2's buffer format is different from v1. If you update the plugin to v2, don't reuse v1's buffer.
+
 ## Installation
 
     $ fluent-gem install fluent-plugin-sql --no-document
