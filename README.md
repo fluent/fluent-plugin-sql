@@ -117,6 +117,13 @@ This plugin takes advantage of ActiveRecord underneath. For `host`, `port`, `dat
       socket path_to_socket
       remove_tag_prefix my.rdb # optional, dual of tag_prefix in in_sql
 
+      <inject>
+        time_key timestamp
+        time_type string
+        time_format %FT%T%.%N:z
+        utc true
+      </inject>
+    
       <table>
         table table1
         column_mapping 'timestamp:created_at,fluentdata1:dbcol1,fluentdata2:dbcol2,fluentdata3:dbcol3'
@@ -153,6 +160,10 @@ This plugin takes advantage of ActiveRecord underneath. For `host`, `port`, `dat
 * **pool** A connection pool synchronizes thread access to a limited number of database connections
 * **timeout** RDBMS connection timeout
 * **remove_tag_prefix** remove the given prefix from the events. See "tag_prefix" in "Input: Configuration". (optional)
+
+\<inject\> section:
+
+This adds the timestamp of the log record as a property so you can insert it into the database.  See the [inject section docs](https://docs.fluentd.org/configuration/inject-section) for more details.
 
 \<table\> sections:
 
