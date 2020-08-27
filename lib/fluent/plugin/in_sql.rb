@@ -108,6 +108,17 @@ module Fluent::Plugin
         end
       end
 
+      # Make sure we always have a Fluent::EventTime object regardless of what comes in
+      def normalized_time(tv, now)
+        return Fluent::EventTime.from_time(tv) if tv.is_a?(Time)
+        begin
+          Fluent::EventTime.parse(tv.to_s)
+        rescue
+          $log.warn "Message contains invalid timestamp, using current time instead (#{now.inspect})"
+          now
+        end
+      end
+
       # emits next records and returns the last record of emitted records
       def emit_next_records(last_record, limit)
         relation = @model
@@ -123,15 +134,13 @@ module Fluent::Plugin
         relation.each do |obj|
           record = obj.serializable_hash rescue nil
           if record
-            if @time_column && tv = obj.read_attribute(@time_column)
-              if tv.is_a?(Time)
-                time = tv.to_i
+            time =
+              if @time_column && (tv = obj.read_attribute(@time_column))
+                normalized_time(tv, now)
               else
-                time = Time.parse(tv.to_s).to_i rescue now
+                now
               end
-            else
-              time = now
-            end
+
             me.add(time, record)
             last_record = record
           end
