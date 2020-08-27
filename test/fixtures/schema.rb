@@ -19,6 +19,7 @@ ActiveRecord::Schema.define(version: 20160225030107) do
     t.string "message"
     t.datetime "created_at",  null: false
     t.datetime "updated_at",  null: false
+    t.string "custom_time"
   end
 end
 
