@@ -60,13 +60,16 @@ module Fluent::Plugin
       config_param :time_column, :string, default: nil
       config_param :primary_key, :string, default: nil
 
+      attr_reader :log
+
       def configure(conf)
         super
       end
 
-      def init(tag_prefix, base_model, router)
+      def init(tag_prefix, base_model, router, log)
         @router = router
         @tag = "#{tag_prefix}.#{@tag}" if tag_prefix
+        @log = log
 
         # creates a model for this table
         table_name = @table
@@ -114,7 +117,7 @@ module Fluent::Plugin
         begin
           Fluent::EventTime.parse(tv.to_s)
         rescue
-          $log.warn "Message contains invalid timestamp, using current time instead (#{now.inspect})"
+          log.warn "Message contains invalid timestamp, using current time instead (#{now.inspect})"
           now
         end
       end
@@ -226,7 +229,7 @@ module Fluent::Plugin
       # ignore tables if TableElement#init failed
       @tables.reject! do |te|
         begin
-          te.init(@tag_prefix, @base_model, router)
+          te.init(@tag_prefix, @base_model, router, log)
           log.info "Selecting '#{te.table}' table"
           false
         rescue => e
