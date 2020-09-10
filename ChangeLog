@@ -1,3 +1,7 @@
+Release 2.1.0 - 2020/09/09
+
+　* in_sql: Use Fluent::EventTime instead of Integer to preserve millisecond precision
+
 Release 2.0.0 - 2020/04/22
 
   * out_sql: Remove v0.12 API code and use full v1 API. Change buffer format.
