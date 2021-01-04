@@ -1,0 +1,45 @@
+name: linux
+on:
+  - push
+  - pull_request
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: [ '2.4', '2.5', '2.6', '2.7' ]
+        os:
+          - ubuntu-latest
+    services:
+      postgres:
+        image: postgres:13
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    name: Ruby ${{ matrix.ruby }} unit testing on ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+    - name: prepare database
+      env:
+        PGPASSWORD: password
+      run: |
+        psql -h localhost -p 5432 -U postgres -c "CREATE ROLE fluentd WITH LOGIN ENCRYPTED PASSWORD 'fluentd';"
+        psql -h localhost -p 5432 -U postgres -c "CREATE DATABASE fluentd_test OWNER fluentd;"
+    - name: unit testing
+      run: |
+        gem install bundler rake
+        bundle install --jobs 4 --retry 3
+        bundle exec rake test
