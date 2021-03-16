@@ -17,6 +17,8 @@
 #
 
 require "fluent/plugin/input"
+require 'aws-sdk-s3'
+
 
 module Fluent::Plugin
 
@@ -44,6 +46,12 @@ module Fluent::Plugin
 
     desc 'path to a file to store last rows'
     config_param :state_file, :string, default: nil
+    desc 'S3 bucket name to store statefile (optional)'
+    config_param :s3_bucket_name, :string, default: nil
+    desc 'S3 bucket key (optional)'
+    config_param :s3_bucket_key, :string, default: nil
+    desc 'AWS regions(optional)'
+    config_param :aws_region, :string, default: nil
     desc 'prefix of tags of events. actual tag will be this_tag_prefix.tables_tag (optional)'
     config_param :tag_prefix, :string, default: nil
     desc 'interval to run SQLs (optional)'
@@ -180,7 +188,11 @@ module Fluent::Plugin
     SKIP_TABLE_REGEXP = /\Aschema_migrations\Z/i
 
     def start
-      @state_store = @state_file.nil? ? MemoryStateStore.new : StateStore.new(@state_file)
+      if @s3_bucket_name
+        @state_store = S3StateStore.new
+      else
+        @state_store = @state_file.nil? ? MemoryStateStore.new : StateStore.new(@state_file)
+      end
 
       config = {
         adapter: @adapter,
@@ -315,6 +327,41 @@ module Fluent::Plugin
       def update!
       end
     end
+
+    class S3StateStore
+      def initialize(s3_bucket_name, s3_bucket_key, aws_region)
+        @data = {}
+        @bucket_name = s3_bucket_name
+        @object_key = s3_bucket_key
+        @region = aws_region
+      end
+
+      def last_records
+        @data['last_records'] ||= {}
+      end
+
+      def update!
+        s3_client = Aws::S3::Client.new(region: @region)
+
+        response = s3_client.put_object(
+          bucket: @bucket_name ,
+          key: @object_key ,
+          body: YAML.dump(@data)
+        )
+        if response.etag
+          return true
+        else
+          return false
+        end
+        rescue StandardError => e
+          puts "Error uploading object: #{e.message}"
+        return false
+
+      end
+    end
+
+
+
   end
 
 end
