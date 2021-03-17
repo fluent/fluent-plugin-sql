@@ -18,9 +18,9 @@ class SqlInputTestS3 < Test::Unit::TestCase
     username fluentd
     password fluentd
 
-    s3_bucket_name joustie
-    s3_bucket_key test.test
-    aws_region eu-west-1
+    s3_bucket_name fluentd_test
+    s3_bucket_key sql.state
+    aws_region us-east-1
 
     schema_search_path public
 
@@ -81,16 +81,33 @@ class SqlInputTestS3 < Test::Unit::TestCase
 
     assert_equal("db.logs", d.events[0][0])
     expected = [
-      [d.events[0][1], "message 4"],
-      [d.events[1][1], "message 5"],
-      [d.events[2][1], "message 6"],
+      [d.events[3][1], "message 4"],
+      [d.events[4][1], "message 5"],
+      [d.events[5][1], "message 6"],
     ]
     actual = [
+      [Fluent::EventTime.parse(d.events[3][2]["updated_at"]), d.events[3][2]["message"]],
       [Fluent::EventTime.parse(d.events[4][2]["updated_at"]), d.events[4][2]["message"]],
       [Fluent::EventTime.parse(d.events[5][2]["updated_at"]), d.events[5][2]["message"]],
-      [Fluent::EventTime.parse(d.events[6][2]["updated_at"]), d.events[6][2]["message"]],
     ]
     assert_equal(expected, actual)
+
+    # Test if last updated recordid is saved in state file on S3
+    s3_client = Aws::S3::Client.new(region: 'us-east-1')
+    resp = s3_client.get_object(bucket:'fluentd_test', key:'sql.state')
+    if resp
+      @data = YAML.load(resp.body.read)
+    else
+      @data = {}
+    end
+
+    # Reported id by plugin
+    expected = d.events[5][2]["id"]
+    # Id saved in S3
+    actual = @data['last_records']['messages']['id']
+
+    assert_equal(expected, actual)
+
   end
 
   class Message < ActiveRecord::Base
