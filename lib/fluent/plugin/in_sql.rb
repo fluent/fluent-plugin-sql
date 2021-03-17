@@ -336,20 +336,15 @@ module Fluent::Plugin
         @region = aws_region
 
         s3_client = Aws::S3::Client.new(region: @region)
-        resp = s3_client.get_object(bucket:@bucket_name, key:@object_key)
-        if resp
-          @data = YAML.load(resp.body.read)
-          print @data
+        s3response = s3_client.get_object(bucket:@bucket_name, key:@object_key)
+        if s3response
+          @data = YAML.load(s3response.body.read)
           if @data == false || @data == []
-            # this happens if an users created an empty file accidentally
             @data = {}
           end
         else
           @data = {}
         end
-
-        @data = {}
-
       end
 
       def last_records
@@ -375,9 +370,5 @@ module Fluent::Plugin
 
       end
     end
-
-
-
   end
-
 end
