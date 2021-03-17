@@ -4,6 +4,25 @@ require "fluent/test/driver/input"
 class SqlInputTestS3 < Test::Unit::TestCase
   def setup
     Fluent::Test.setup
+
+    @bucket_name = 'fluentd-test12345'
+    # creating the object_key for the test
+    s3_client = Aws::S3::Client.new(region: 'us-east-1')
+
+        response = s3_client.put_object(
+          bucket:  @bucket_name,
+          key: 'sql.state' ,
+          body: ''
+        )
+        if response.etag
+          return true
+        else
+          return false
+        end
+        rescue StandardError => e
+          puts "Error creating object: #{e.message}"
+        return false
+
   end
 
   def teardown
@@ -18,7 +37,7 @@ class SqlInputTestS3 < Test::Unit::TestCase
     username fluentd
     password fluentd
 
-    s3_bucket_name fluentd_test
+    s3_bucket_name fluentd-test12345
     s3_bucket_key sql.state
     aws_region us-east-1
 
@@ -94,7 +113,7 @@ class SqlInputTestS3 < Test::Unit::TestCase
 
     # Test if last updated recordid is saved in state file on S3
     s3_client = Aws::S3::Client.new(region: 'us-east-1')
-    resp = s3_client.get_object(bucket:'fluentd_test', key:'sql.state')
+    resp = s3_client.get_object(bucket:@bucket_name, key:'sql.state')
     if resp
       @data = YAML.load(resp.body.read)
     else
