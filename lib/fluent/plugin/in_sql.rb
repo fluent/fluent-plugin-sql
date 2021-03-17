@@ -189,7 +189,7 @@ module Fluent::Plugin
 
     def start
       if @s3_bucket_name
-        @state_store = S3StateStore.new
+        @state_store = S3StateStore.new(@s3_bucket_name,@s3_bucket_key,@aws_region)
       else
         @state_store = @state_file.nil? ? MemoryStateStore.new : StateStore.new(@state_file)
       end

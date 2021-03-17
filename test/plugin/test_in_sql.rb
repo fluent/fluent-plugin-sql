@@ -18,6 +18,10 @@ class SqlInputTest < Test::Unit::TestCase
     username fluentd
     password fluentd
 
+    s3_bucket_name joustie
+    s3_bucket_key test.test
+    aws_region eu-west-1
+
     schema_search_path public
 
     tag_prefix db
