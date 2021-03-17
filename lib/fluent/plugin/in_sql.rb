@@ -50,7 +50,7 @@ module Fluent::Plugin
     config_param :s3_bucket_name, :string, default: nil
     desc 'S3 bucket key (optional)'
     config_param :s3_bucket_key, :string, default: nil
-    desc 'AWS regions(optional)'
+    desc 'AWS region (optional)'
     config_param :aws_region, :string, default: nil
     desc 'prefix of tags of events. actual tag will be this_tag_prefix.tables_tag (optional)'
     config_param :tag_prefix, :string, default: nil
@@ -334,7 +334,7 @@ module Fluent::Plugin
         @bucket_name = s3_bucket_name
         @object_key = s3_bucket_key
         @region = aws_region
-        
+
         s3_client = Aws::S3::Client.new(region: @region)
         resp = s3_client.get_object(bucket:@bucket_name, key:@object_key)
         if resp
