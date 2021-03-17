@@ -41,7 +41,7 @@ SELECT * FROM *table* WHERE *update\_column* > *last\_update\_column\_value* ORD
 What you need to configure is *update\_column*. The column should be an incremental column (such as AUTO\_ INCREMENT primary key) so that this plugin reads newly INSERTed rows. Alternatively, you can use a column incremented every time when you update the row (such as `last_updated_at` column) so that this plugin reads the UPDATEd rows as well.
 If you omit to set *update\_column* parameter, it uses primary key.
 
-It stores last selected rows to a file (named *state\_file*) to not forget the last row when Fluentd restarts. If you want to use and AWS S3 object store to hold this information, define the bucket name and key and AWS region. Also make sure AWS credentials are provided through the environment. See https://docs.aws.amazon.com/sdk-for-ruby/v3/developer-guide/setup-config.html
+It stores last selected rows to a file (named *state\_file*) to not forget the last row when Fluentd restarts. If you want to use and AWS S3 object store to hold this information, define the bucket name and key and AWS region. Also make sure AWS credentials are provided through the environment. See https://docs.aws.amazon.com/sdk-for-ruby/v3/developer-guide/setup-config.html. If the bucket_key does not exist yet, you will receive this error: 'Aws::S3::Errors::NoSuchKey: The specified key does not exist'
 
 ## Input: Configuration
 
