@@ -1,7 +1,7 @@
 require "helper"
 require "fluent/test/driver/input"
 
-class SqlInputTest < Test::Unit::TestCase
+class SqlInputTestS3 < Test::Unit::TestCase
   def setup
     Fluent::Test.setup
   end
@@ -17,6 +17,10 @@ class SqlInputTest < Test::Unit::TestCase
 
     username fluentd
     password fluentd
+
+    s3_bucket_name joustie
+    s3_bucket_key test.test
+    aws_region eu-west-1
 
     schema_search_path public
 
@@ -66,9 +70,9 @@ class SqlInputTest < Test::Unit::TestCase
 
   def test_message
     d = create_driver(CONFIG + "select_interval 1")
-    Message.create!(message: "message 1")
-    Message.create!(message: "message 2")
-    Message.create!(message: "message 3")
+    Message.create!(message: "message 4")
+    Message.create!(message: "message 5")
+    Message.create!(message: "message 6")
 
     d.end_if do
       d.record_count >= 3
@@ -77,14 +81,14 @@ class SqlInputTest < Test::Unit::TestCase
 
     assert_equal("db.logs", d.events[0][0])
     expected = [
-      [d.events[0][1], "message 1"],
-      [d.events[1][1], "message 2"],
-      [d.events[2][1], "message 3"],
+      [d.events[0][1], "message 4"],
+      [d.events[1][1], "message 5"],
+      [d.events[2][1], "message 6"],
     ]
     actual = [
-      [Fluent::EventTime.parse(d.events[0][2]["updated_at"]), d.events[0][2]["message"]],
-      [Fluent::EventTime.parse(d.events[1][2]["updated_at"]), d.events[1][2]["message"]],
-      [Fluent::EventTime.parse(d.events[2][2]["updated_at"]), d.events[2][2]["message"]],
+      [Fluent::EventTime.parse(d.events[4][2]["updated_at"]), d.events[4][2]["message"]],
+      [Fluent::EventTime.parse(d.events[5][2]["updated_at"]), d.events[5][2]["message"]],
+      [Fluent::EventTime.parse(d.events[6][2]["updated_at"]), d.events[6][2]["message"]],
     ]
     assert_equal(expected, actual)
   end
