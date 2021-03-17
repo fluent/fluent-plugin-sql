@@ -2,32 +2,7 @@ require "helper"
 require "fluent/test/driver/input"
 
 class SqlInputTestS3 < Test::Unit::TestCase
-  def setup
-    Fluent::Test.setup
-
-    @bucket_name = 'fluentd-test12345'
-    # creating the object_key for the test
-    s3_client = Aws::S3::Client.new(region: 'us-east-1')
-
-        response = s3_client.put_object(
-          bucket:  @bucket_name,
-          key: 'sql.state' ,
-          body: ''
-        )
-        if response.etag
-          return true
-        else
-          return false
-        end
-        rescue StandardError => e
-          puts "Error creating object: #{e.message}"
-        return false
-
-  end
-
-  def teardown
-  end
-
+  
   CONFIG = %[
     adapter postgresql
     host localhost
@@ -52,6 +27,33 @@ class SqlInputTestS3 < Test::Unit::TestCase
       time_column updated_at
     </table>
   ]
+
+  def setup
+    Fluent::Test.setup
+    
+    @bucket_name = 'fluentd-test12345'
+    @bucket_key  = 'sql.state'
+    @aws_region  = 'us-east-1'
+
+    # creating the object_key for the test
+    s3_client = Aws::S3::Client.new(region: @aws_region)
+    s3_response = s3_client.put_object(
+          bucket: @bucket_name,
+          key: @bucket_key,
+          body: ''
+        )
+    if s3_response.etag
+      return true
+    else
+      return false
+    end
+    rescue StandardError => e
+      puts "Error creating object: #{e.message}"
+    return false
+  end
+
+  def teardown
+  end
 
   def create_driver(conf = CONFIG)
     Fluent::Test::Driver::Input.new(Fluent::Plugin::SQLInput).configure(conf)
@@ -110,12 +112,14 @@ class SqlInputTestS3 < Test::Unit::TestCase
       [Fluent::EventTime.parse(d.events[5][2]["updated_at"]), d.events[5][2]["message"]],
     ]
     assert_equal(expected, actual)
-
+    
     # Test if last updated recordid is saved in state file on S3
-    s3_client = Aws::S3::Client.new(region: 'us-east-1')
-    resp = s3_client.get_object(bucket:@bucket_name, key:'sql.state')
-    if resp
-      @data = YAML.load(resp.body.read)
+    s3_client = Aws::S3::Client.new(region: @aws_region)
+    s3_response = s3_client.get_object(
+      bucket: @bucket_name, 
+      key: @bucket_key)
+    if s3_response
+      @data = YAML.load(s3_response.body.read)
     else
       @data = {}
     end
@@ -126,7 +130,6 @@ class SqlInputTestS3 < Test::Unit::TestCase
     actual = @data['last_records']['messages']['id']
 
     assert_equal(expected, actual)
-
   end
 
   class Message < ActiveRecord::Base
