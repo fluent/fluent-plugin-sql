@@ -41,7 +41,7 @@ SELECT * FROM *table* WHERE *update\_column* > *last\_update\_column\_value* ORD
 What you need to configure is *update\_column*. The column should be an incremental column (such as AUTO\_ INCREMENT primary key) so that this plugin reads newly INSERTed rows. Alternatively, you can use a column incremented every time when you update the row (such as `last_updated_at` column) so that this plugin reads the UPDATEd rows as well.
 If you omit to set *update\_column* parameter, it uses primary key.
 
-It stores last selected rows to a file (named *state\_file*) to not forget the last row when Fluentd restarts.
+It stores last selected rows to a file (named *state\_file*) to not forget the last row when Fluentd restarts. If you want to use and AWS S3 object store to hold this information, define the bucket name and key and AWS region. Also make sure AWS credentials are provided through the environment. See https://docs.aws.amazon.com/sdk-for-ruby/v3/developer-guide/setup-config.html
 
 ## Input: Configuration
 
@@ -60,6 +60,10 @@ It stores last selected rows to a file (named *state\_file*) to not forget the l
       select_limit 500     # optional
 
       state_file /var/run/fluentd/sql_state
+
+      s3_bucket_name mybucketname   # optional
+      s3_bucket_key mybucketkey     # optional
+      aws_region myregion           # optional
 
       <table>
         table table1
@@ -89,6 +93,9 @@ It stores last selected rows to a file (named *state\_file*) to not forget the l
 * **select_interval** interval to run SQLs (optional)
 * **select_limit** LIMIT of number of rows for each SQL (optional)
 * **state_file** path to a file to store last rows
+* **s3_bucket_name** S3 bucket name in AWS where to store sql state information (optional)
+* **s3_bucket_key** S3 bucket key in AWS which will contain the actual sql information (optional)
+* **aws_region** AWS region where the bucket is located (optional)
 * **all_tables** reads all tables instead of configuring each tables in \<table\> sections
 
 \<table\> sections:
@@ -138,7 +145,7 @@ This plugin takes advantage of ActiveRecord underneath. For `host`, `port`, `dat
         # the message comes in with the tag my.rdb.hello.world, "remove_tag_prefix my.rdb"
         # makes it "hello.world", which gets matched here because of "pattern hello.*".
       </table>
-      
+
       <table hello.world>
         table table3
         # This is the second non-default table. You can have as many non-default tables
