@@ -16,8 +16,11 @@ jobs:
     services:
       minio:
         image: minio/minio:latest
+        volumes:
+          - data:/data
         ports:
           - 9000:9000
+        command: server /data
       postgres:
         image: postgres:${{ matrix.postgres }}
         ports:
@@ -43,6 +46,12 @@ jobs:
       run: |
         psql -h localhost -p 5432 -U postgres -c "CREATE ROLE fluentd WITH LOGIN ENCRYPTED PASSWORD 'fluentd';"
         psql -h localhost -p 5432 -U postgres -c "CREATE DATABASE fluentd_test OWNER fluentd;"
+    - name: prepare minio s3
+      run: |
+        wget https://dl.minio.io/client/mc/release/linux-amd64/mc
+        chmod +x mc
+        ./mc config host add minio http://minio:9000 minioadmin minioadmin
+        ./mc mb minio/fluentd-test12345
     - name: unit testing
       run: |
         gem install bundler rake
