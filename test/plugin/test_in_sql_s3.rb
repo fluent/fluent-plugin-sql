@@ -2,7 +2,7 @@ require "helper"
 require "fluent/test/driver/input"
 
 class SqlInputTestS3 < Test::Unit::TestCase
-  
+
   CONFIG = %[
     adapter postgresql
     host localhost
@@ -30,10 +30,19 @@ class SqlInputTestS3 < Test::Unit::TestCase
 
   def setup
     Fluent::Test.setup
-    
+
     @bucket_name = 'fluentd-test12345'
     @bucket_key  = 'sql.state'
     @aws_region  = 'us-east-1'
+
+    # Redirect S3 to minio to mock AWS
+    Aws.config.update(
+        endpoint: 'http://localhost:9000',
+        access_key_id: 'minioadmin',
+        secret_access_key: 'minioadmin',
+        force_path_style: true,
+        region: @aws_region
+    )
 
     # creating the object_key for the test
     s3_client = Aws::S3::Client.new(region: @aws_region)
@@ -112,11 +121,11 @@ class SqlInputTestS3 < Test::Unit::TestCase
       [Fluent::EventTime.parse(d.events[5][2]["updated_at"]), d.events[5][2]["message"]],
     ]
     assert_equal(expected, actual)
-    
+
     # Test if last updated recordid is saved in state file on S3
     s3_client = Aws::S3::Client.new(region: @aws_region)
     s3_response = s3_client.get_object(
-      bucket: @bucket_name, 
+      bucket: @bucket_name,
       key: @bucket_key)
     if s3_response
       @data = YAML.load(s3_response.body.read)
