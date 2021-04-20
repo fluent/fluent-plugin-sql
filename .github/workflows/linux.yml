@@ -13,6 +13,28 @@ jobs:
         postgres: [ '9', '10', '11', '12', '13' ]
         os:
           - ubuntu-latest
+        experimental: [false]
+        include:
+          - ruby: head
+            postgres: '9'
+            os: ubuntu-latest
+            experimental: true
+          - ruby: head
+            postgres: '10'
+            os: ubuntu-latest
+            experimental: true
+          - ruby: head
+            postgres: '11'
+            os: ubuntu-latest
+            experimental: true
+          - ruby: head
+            postgres: '12'
+            os: ubuntu-latest
+            experimental: true
+          - ruby: head
+            postgres: '13'
+            os: ubuntu-latest
+            experimental: true
     services:
       postgres:
         image: postgres:${{ matrix.postgres }}
