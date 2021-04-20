@@ -1,3 +1,7 @@
+Release 2.2.0 - 2021/04/20
+
+　* Upgrade ActiveRecord to 6.1
+
 Release 2.1.0 - 2020/09/09
 
 　* in_sql: Use Fluent::EventTime instead of Integer to preserve millisecond precision
