@@ -27,11 +27,6 @@ We recommend that mysql2 gem is higher than `0.3.12` and pg gem is higher than `
 
 If you use ruby 2.1, use pg gem 0.21.0 (< 1.0.0) because ActiveRecord 5.1.4 or earlier doesn't support Ruby 2.1.
 
-### Resolve tzinfo version conflict
-
-If you want to use fluent-plugin-sql with recent fluentd/td-agent, you need to downgrade tzinfo to v1.x manually.
-See also this comment: https://github.com/fluent/fluent-plugin-sql/issues/87#issuecomment-614552292
-
 ## Input: How It Works
 
 This plugin runs following SQL periodically:
