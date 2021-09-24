@@ -44,6 +44,7 @@ It stores last selected rows to a file (named *state\_file*) to not forget the l
       @type sql
 
       host rdb_host
+	  port rdb_port
       database rdb_database
       adapter mysql2_or_postgresql_or_etc
       username myusername
