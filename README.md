@@ -69,6 +69,7 @@ It stores last selected rows to a file (named *state\_file*) to not forget the l
         tag table2  # optional
         update_column updated_at
         time_column updated_at  # optional
+        time_format %Y-%m-%d %H:%M:%S.%6N # optional
       </table>
 
       # detects all tables instead of <table> sections
@@ -94,6 +95,7 @@ It stores last selected rows to a file (named *state\_file*) to not forget the l
 * **update_column**: see above description
 * **time_column** (optional): if this option is set, this plugin uses this column's value as the the event's time. Otherwise it uses current time.
 * **primary_key** (optional): if you want to get data from the table which doesn't have primary key like PostgreSQL's View, set this parameter.
+* **time_format** (optional): if you want to specify the format of the date used in the query, useful when using alternative adapters which have restrictions on format
 
 ## Input: Limitation
 

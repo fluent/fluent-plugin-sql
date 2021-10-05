@@ -59,7 +59,7 @@ module Fluent::Plugin
       config_param :update_column, :string, default: nil
       config_param :time_column, :string, default: nil
       config_param :primary_key, :string, default: nil
-
+      config_param :time_format, :string, default: '%Y-%m-%d %H:%M:%S.%6N%z'
       attr_reader :log
 
       def configure(conf)
@@ -74,6 +74,9 @@ module Fluent::Plugin
         # creates a model for this table
         table_name = @table
         primary_key = @primary_key
+        time_formats = Fluent::VariableStore.fetch_or_build(:time_formats)
+        time_formats[table_name] = @time_format
+
         @model = Class.new(base_model) do
           self.table_name = table_name
           self.inheritance_column = '_never_use_'
@@ -81,12 +84,17 @@ module Fluent::Plugin
 
           #self.include_root_in_json = false
 
+          def time_format
+            time_formats = Fluent::VariableStore.fetch_or_build(:time_formats)
+            time_formats[self.class.table_name]
+          end
+
           def read_attribute_for_serialization(n)
             v = send(n)
             if v.respond_to?(:to_msgpack)
               v
             elsif v.is_a? Time
-              v.strftime('%Y-%m-%d %H:%M:%S.%6N%z')
+              v.strftime(time_format)
             else
               v.to_s
             end
