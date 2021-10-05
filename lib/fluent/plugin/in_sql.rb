@@ -74,27 +74,22 @@ module Fluent::Plugin
         # creates a model for this table
         table_name = @table
         primary_key = @primary_key
-        time_formats = Fluent::VariableStore.fetch_or_build(:time_formats)
-        time_formats[table_name] = @time_format
+        time_format = @time_format
 
         @model = Class.new(base_model) do
           self.table_name = table_name
           self.inheritance_column = '_never_use_'
           self.primary_key = primary_key if primary_key
+          self.const_set(:TIME_FORMAT, time_format)
 
           #self.include_root_in_json = false
-
-          def time_format
-            time_formats = Fluent::VariableStore.fetch_or_build(:time_formats)
-            time_formats[self.class.table_name]
-          end
 
           def read_attribute_for_serialization(n)
             v = send(n)
             if v.respond_to?(:to_msgpack)
               v
             elsif v.is_a? Time
-              v.strftime(time_format)
+              v.strftime(self.class::TIME_FORMAT)
             else
               v.to_s
             end
