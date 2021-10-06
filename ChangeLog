@@ -1,3 +1,7 @@
+Release 2.3.0 - 2021/10/08
+
+　* in_sql: Make table time_format configurable
+
 Release 2.2.0 - 2021/04/20
 
 　* Upgrade ActiveRecord to 6.1
