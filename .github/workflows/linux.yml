@@ -56,6 +56,7 @@ jobs:
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
+        bundler-cache: true
     - name: prepare database
       env:
         PGPASSWORD: password
@@ -63,7 +64,4 @@ jobs:
         psql -h localhost -p 5432 -U postgres -c "CREATE ROLE fluentd WITH LOGIN ENCRYPTED PASSWORD 'fluentd';"
         psql -h localhost -p 5432 -U postgres -c "CREATE DATABASE fluentd_test OWNER fluentd;"
     - name: unit testing
-      run: |
-        gem install bundler rake
-        bundle install --jobs 4 --retry 3
-        bundle exec rake test
+      run: bundle exec rake test
