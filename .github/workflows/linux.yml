@@ -50,7 +50,7 @@ jobs:
           --health-retries 5
     name: Ruby ${{ matrix.ruby }} with PostgreSQL ${{ matrix.postgres }} unit testing on ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
