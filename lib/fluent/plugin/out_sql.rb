@@ -120,17 +120,19 @@ module Fluent::Plugin
           begin
             @model.import([record])
           rescue ActiveRecord::StatementInvalid, ActiveRecord::Import::MissingColumnError => e
-            @log.error "Got deterministic error again. Dump a record", error: e, record: record
-          rescue => e
+            @log.error "Got deterministic error. Dump a record", error: e, record: record
             retries += 1
-            if retries > @num_retries
-              @log.error "Can't recover undeterministic error. Dump a record", error: e, record: record
-              next
-            end
-
             @log.warn "Failed to import a record: retry number = #{retries}", error: e
             sleep 0.5
             retry
+          rescue => e
+            if retries > @num_retries
+              @log.error "Can't recover undeterministic error. Dump a record", error: e, record: record
+              retries += 1
+              @log.warn "Failed to import a record: retry number = #{retries}", error: e
+              sleep 0.5
+              retry
+            end
           end
         }
       end
