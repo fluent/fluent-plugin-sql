@@ -282,7 +282,7 @@ module Fluent::Plugin
         require 'yaml'
 
         @path = path
-        if File.exists?(@path)
+        if File.exist?(@path)
           @data = YAML.load_file(@path)
           if @data == false || @data == []
             # this happens if an users created an empty file accidentally
