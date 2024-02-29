@@ -1,3 +1,7 @@
+Release 2.3.1 - 2024/02/29
+
+　* in_sql: Fix incompatibility against Ruby 3.2
+
 Release 2.3.0 - 2021/10/08
 
 　* in_sql: Make table time_format configurable
