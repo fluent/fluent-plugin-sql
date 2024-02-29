@@ -1,4 +1,4 @@
-name: linux
+name: Test
 on:
   push:
     branches: [master]

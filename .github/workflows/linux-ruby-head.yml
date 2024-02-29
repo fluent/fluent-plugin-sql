@@ -1,4 +1,4 @@
-name: linux
+name: Test with Ruby head
 on:
   schedule:
     - cron: '11 23 * * 0'
