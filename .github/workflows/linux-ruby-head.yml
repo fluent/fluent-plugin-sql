@@ -7,7 +7,6 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
@@ -15,7 +14,6 @@ jobs:
         postgres: [ '16', '15', '14', '13', '12' ]
         os:
           - ubuntu-latest
-        experimental: [true]
     services:
       postgres:
         image: postgres:${{ matrix.postgres }}
