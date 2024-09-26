@@ -206,7 +206,7 @@ module Fluent::Plugin
       end
 
       SQLOutput.const_set("BaseModel_#{rand(1 << 31)}", @base_model)
-      ActiveRecord::Base.establish_connection(config)
+      @base_model.establish_connection(config)
 
       # ignore tables if TableElement#init failed
       @tables.reject! do |te|
@@ -224,7 +224,7 @@ module Fluent::Plugin
     end
 
     def write(chunk)
-      ActiveRecord::Base.connection_pool.with_connection do
+      @base_model.connection_pool.with_connection do
 
         @tables.each { |table|
           tag = format_tag(chunk.metadata.tag)
