@@ -27,6 +27,34 @@ We recommend that mysql2 gem is higher than `0.3.12` and pg gem is higher than `
 
 If you use ruby 2.1, use pg gem 0.21.0 (< 1.0.0) because ActiveRecord 5.1.4 or earlier doesn't support Ruby 2.1.
 
+#### Using the [Fluentd docker](https://hub.docker.com/r/fluent/fluentd/) container?
+
+  - Extend the base image (recommended):
+
+    ```Dockerfile
+	FROM fluent/fluentd:edge-debian
+	
+	USER root
+	
+	# Install PostgreSQL client development files and build tools
+	RUN apt-get update && apt-get install -y libpq-dev build-essential
+	
+	# Install pg & plugin gems for PostgreSQL
+	RUN fluent-gem install fluent-plugin-sql --no-document && fluent-gem install pg --no-document
+	
+	USER fluent
+    ```
+
+
+  - Directly alter the container:
+    ```bash
+	$ docker exec -it --user root fluentd_container /bin/bash	# login as root required.
+	$ apt-get update
+	$ apt-get install -y libpq-dev build-essential			# required dependencies for 'pg' gem.
+	$ fluent-gem install fluent-plugin-sql --no-document
+	$ fluent-gem install pg --no-document # for postgresql
+    ```
+
 ## Input: How It Works
 
 This plugin runs following SQL periodically:
