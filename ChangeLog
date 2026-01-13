@@ -1,3 +1,9 @@
+Release 2.3.2 - 2026/01/13
+
+  * out_sql: Use isolated connection configurations in the output plugin (#152)
+  * gem: Add ostruct as dependency for Ruby 4.0 (#159)
+  * gem: Relax required activesupport version to accept latest one (#161, #148)
+
 Release 2.3.1 - 2024/02/29
 
 　* in_sql: Fix incompatibility against Ruby 3.2
