@@ -18,7 +18,7 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency "fluentd", [">= 1.7.0", "< 2"]
   gem.add_dependency "ostruct", '~> 0.6'
-  gem.add_dependency 'activerecord', [">= 6.1", "< 7.2"]
+  gem.add_dependency 'activerecord', [">= 6.1", "< 8.2"]
   gem.add_dependency 'activerecord-import', "~> 1.0"
   gem.add_development_dependency "rake", ">= 0.9.2"
   gem.add_development_dependency "test-unit", "> 3.1.0"
