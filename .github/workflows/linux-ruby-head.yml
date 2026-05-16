@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby: [ 'head' ]
-        postgres: [ '16', '15', '14', '13', '12' ]
+        postgres: [ '18', '17', '16', '15', '14' ]
         os:
           - ubuntu-latest
     services:
