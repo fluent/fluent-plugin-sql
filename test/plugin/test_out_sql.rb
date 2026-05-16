@@ -80,6 +80,41 @@ class SqlOutputTest < Test::Unit::TestCase
     assert_equal(["message1", "message2"], messages)
   end
 
+  def test_unmapped_column_uses_db_default
+    config = %[
+      host localhost
+      port 5432
+      adapter postgresql
+
+      database fluentd_test
+      username fluentd
+      password fluentd
+
+      schema_search_path public
+
+      remove_tag_prefix db
+
+      <table>
+        table messages_unmapped
+        column_mapping message:message
+      </table>
+    ]
+
+    d = create_driver(config)
+    time = Time.parse("2011-01-02 13:14:15 UTC").to_i
+
+    d.run(default_tag: 'test') do
+      d.feed(time, {'message' => 'hello'})
+    end
+
+    records = ActiveRecord::Base.connection.select_all("SELECT * FROM messages_unmapped").to_a
+
+    assert_equal 1, records.size
+    assert_equal 'hello', records.first['message']
+    # The 'status' column is not mapped, so it should use the default value defined in the database schema
+    assert_equal 'default_status', records.first['status']
+  end
+
   class Fallback < self
     def test_simple
       d = create_driver
@@ -91,10 +126,10 @@ class SqlOutputTest < Test::Unit::TestCase
 
         default_table = d.instance.instance_variable_get(:@default_table)
         model = default_table.instance_variable_get(:@model)
-        mock(model).import(anything).at_least(1) do
+        mock(model).import(anything, anything).at_least(1) do
           raise ActiveRecord::Import::MissingColumnError.new("dummy_table", "dummy_column")
         end
-        mock(default_table).one_by_one_import(anything)
+        mock(default_table).one_by_one_import(anything, anything)
       end
     end
 
@@ -108,10 +143,10 @@ class SqlOutputTest < Test::Unit::TestCase
 
         default_table = d.instance.instance_variable_get(:@default_table)
         model = default_table.instance_variable_get(:@model)
-        mock(model).import([anything, anything]).once do
+        mock(model).import(anything, [anything, anything]).once do
           raise ActiveRecord::Import::MissingColumnError.new("dummy_table", "dummy_column")
         end
-        mock(model).import([anything]).times(12) do
+        mock(model).import(anything, [anything]).times(12) do
           raise StandardError
         end
         assert_equal(5, default_table.instance_variable_get(:@num_retries))
