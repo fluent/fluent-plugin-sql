@@ -1,3 +1,7 @@
+Release 2.3.3 - 2026/05/18
+
+  * out_sql: fix unmapped columns being explicitly set to NULL on INSERT (#169)
+
 Release 2.3.2 - 2026/01/13
 
   * out_sql: Use isolated connection configurations in the output plugin (#152)
