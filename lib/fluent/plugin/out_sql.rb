@@ -90,23 +90,26 @@ module Fluent::Plugin
 
       def import(chunk, output)
         tag = chunk.metadata.tag
+        columns = []
         records = []
         chunk.msgpack_each { |time, data|
           begin
             data = output.inject_values_to_record(tag, time, data)
-            records << @model.new(@format_proc.call(data))
+            new_record = @format_proc.call(data)
+            columns |= new_record.keys
+            records << @model.new(new_record)
           rescue => e
             args = {error: e, table: @table, record: Yajl.dump(data)}
             @log.warn "Failed to create the model. Ignore a record:", args
           end
         }
         begin
-          @model.import(records)
+          @model.import(columns, records)
         rescue ActiveRecord::StatementInvalid, ActiveRecord::Import::MissingColumnError => e
           if @enable_fallback
             # ignore other exceptions to use Fluentd retry mechanizm
             @log.warn "Got deterministic error. Fallback to one-by-one import", error: e
-            one_by_one_import(records)
+            one_by_one_import(columns, records)
           else
             @log.warn "Got deterministic error. Fallback is disabled", error: e
             raise e
@@ -114,11 +117,11 @@ module Fluent::Plugin
         end
       end
 
-      def one_by_one_import(records)
+      def one_by_one_import(columns, records)
         records.each { |record|
           retries = 0
           begin
-            @model.import([record])
+            @model.import(columns, [record])
           rescue ActiveRecord::StatementInvalid, ActiveRecord::Import::MissingColumnError => e
             @log.error "Got deterministic error again. Dump a record", error: e, record: record
           rescue => e
