@@ -99,7 +99,7 @@ module Fluent::Plugin
             columns |= new_record.keys
             records << @model.new(new_record)
           rescue => e
-            args = {error: e, table: @table, record: Yajl.dump(data)}
+            args = {error: e, table: @table, record: JSON.generate(data)}
             @log.warn "Failed to create the model. Ignore a record:", args
           end
         }
