@@ -30,6 +30,22 @@ class SqlInputTest < Test::Unit::TestCase
     </table>
   ]
 
+  ALL_TABLES_CONFIG = %[
+    adapter postgresql
+    host localhost
+    port 5432
+    database fluentd_test
+
+    username fluentd
+    password fluentd
+
+    schema_search_path public
+
+    tag_prefix db
+
+    all_tables true
+  ]
+
   def create_driver(conf = CONFIG)
     Fluent::Test::Driver::Input.new(Fluent::Plugin::SQLInput).configure(conf)
   end
@@ -62,6 +78,18 @@ class SqlInputTest < Test::Unit::TestCase
     messages = tables.first
     assert_equal("messages", messages.table)
     assert_equal("logs", messages.tag)
+  end
+
+  def test_all_tables
+    d = create_driver(ALL_TABLES_CONFIG)
+    d.instance.start
+    begin
+      table_names = d.instance.instance_variable_get(:@tables).map(&:table)
+      assert { table_names.include?("messages") }
+      assert { !table_names.include?("schema_migrations") }
+    ensure
+      d.instance.shutdown
+    end
   end
 
   def test_message
