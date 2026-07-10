@@ -86,7 +86,7 @@ class SqlInputTest < Test::Unit::TestCase
     begin
       table_names = d.instance.instance_variable_get(:@tables).map(&:table)
       assert { table_names.include?("messages") }
-      assert { !table_names.include?("schema_migrations") }
+      assert { table_names.none? { |table_name| table_name.match?(Fluent::Plugin::SQLInput::SKIP_TABLE_REGEXP) }}
     ensure
       d.instance.shutdown
     end
