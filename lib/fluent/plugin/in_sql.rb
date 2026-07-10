@@ -219,11 +219,10 @@ module Fluent::Plugin
             nil
           else
             te = TableElement.new
-            te.configure({
+            te.configure(Fluent::Config::Element.new('table', '', {
               'table' => table_name,
               'tag' => table_name,
-              'update_column' => nil,
-            })
+            }, []))
             te
           end
         end.compact
