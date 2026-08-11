@@ -195,7 +195,9 @@ module Fluent::Plugin
         socket: @socket,
         schema_search_path: @schema_search_path,
       }
-
+      # This makes the default timezone the local one if it's undefined in the timestamp field itself
+      ActiveRecord::Base.default_timezone = :local
+      
       # creates subclass of ActiveRecord::Base so that it can have different
       # database configuration from ActiveRecord::Base.
       @base_model = Class.new(ActiveRecord::Base) do
